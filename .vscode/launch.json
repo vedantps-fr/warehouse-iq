@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Open Warehouse IQ (Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "file": "${workspaceFolder}/index.html",
+      "preLaunchTask": "Build website"
+    },
+    {
+      "name": "Open Warehouse IQ (Edge)",
+      "type": "msedge",
+      "request": "launch",
+      "file": "${workspaceFolder}/index.html",
+      "preLaunchTask": "Build website"
+    },
+    {
+      "name": "Run tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/tests/run-tests.js",
+      "console": "integratedTerminal"
+    }
+  ]
+}

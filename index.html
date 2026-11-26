@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Warehouse IQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a mission-control console for a warehouse; precise, technical, glowing.
+   IDEA: a dark hangar where every range is a rack of packages and every gap is an empty bay.
+   PICTURE: 3D hangar, 3D index tree, 3D dashboard bars and towers, side-by-side 3D trees.
+   COLOUR and TYPE: navy #070b14 with cyan #22d3ee, teal, amber, violet, blue accents; Orbitron headings, Inter labels, JetBrains Mono data.
+   LAYOUT: header bar with tabs; KPI strip; hero 3D panel; control panels; scenarios and tests; audit trail. */
+:root{color-scheme:dark;--bg:#060a12;--bg2:#08101c;--card:#0a1322;--card2:#0d1829;--line:#16243a;--line2:#1f3350;--ink:#e6f1ff;--sub:#a9b8cc;--muted:#6f849f;
+--cyan:#22d3ee;--teal:#2dd4bf;--amber:#f59e0b;--violet:#8b5cf6;--blue:#3b82f6;--red:#ef4444;--green:#22c55e;--orange:#f97316;--grey:#64748b;
+--disp:Orbitron,Inter,system-ui,sans-serif;--sans:Inter,system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:130px}
+body{margin:0;background:radial-gradient(1200px 500px at 50% -10%,#0c1a2e 0%,var(--bg) 60%) fixed,var(--bg);color:var(--ink);font:15px/1.55 var(--sans);overflow-x:clip}
+h1,h2,h3{margin:0;font-family:var(--disp);font-weight:700;letter-spacing:.04em;text-transform:uppercase;line-height:1.15}
+h1{font-size:clamp(22px,3vw,30px)}h2{font-size:15px;color:var(--ink)}h3{font-size:12px;color:var(--sub);margin:14px 0 6px;font-family:var(--sans);font-weight:700;letter-spacing:.09em}
+p{margin:0}.muted{color:var(--muted)}.small{font-size:12.5px}.mono{font-family:var(--mono)}
+.lbl{font:700 11px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--sub)}
+.desc{font:400 12px/1.5 var(--mono);color:var(--muted)}
+header.top{position:sticky;top:0;z-index:20;background:rgba(6,10,18,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header .in{max-width:1400px;margin:0 auto;padding:10px max(2.4vw,14px) 4px;display:flex;gap:8px 18px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;gap:12px;align-items:center;text-decoration:none;color:var(--ink)}
+.brand .ic{width:40px;height:40px;border-radius:10px;border:1px solid #2a5068;background:linear-gradient(180deg,#123049,#0b1b2c);display:grid;place-items:center;box-shadow:0 0 18px rgba(34,211,238,.18)}
+.brand b{display:block;font:700 19px var(--disp);letter-spacing:.06em;background:linear-gradient(90deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.brand small{display:block;font:700 10px var(--sans);letter-spacing:.12em;color:var(--teal);text-transform:uppercase;white-space:nowrap}
+.tabs{display:flex;gap:4px;overflow-x:auto;flex:1 1 100%;order:3;scrollbar-width:none;margin:0 -4px}
+.brand{margin-right:auto}
+.tabs a{flex:none;text-decoration:none;color:var(--muted);font:600 13px var(--sans);letter-spacing:.03em;padding:10px 12px;border-radius:8px;min-height:44px;display:flex;align-items:center;border:1px solid transparent}
+.tabs a:hover{color:var(--ink);background:var(--card)}.tabs a[aria-current=page]{color:var(--cyan);background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.35)}
+.hright{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chipglow{display:inline-flex;align-items:center;gap:7px;font:600 11px var(--mono);letter-spacing:.04em;color:var(--teal);padding:6px 12px;border-radius:999px;border:1px solid rgba(45,212,191,.45);background:rgba(45,212,191,.07);white-space:nowrap}
+.chipglow i{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal)}
+.badge{display:inline-flex;align-items:center;gap:6px;font:600 11px var(--mono);padding:6px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line2);cursor:pointer;color:var(--sub);min-height:32px;white-space:nowrap}
+.badge i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}.badge.bad{border-color:var(--red);color:#fecaca}.badge.bad i{background:var(--red);box-shadow:0 0 8px var(--red)}
+.view{display:none;max-width:1400px;margin:0 auto;padding:clamp(14px,2.2vw,26px) max(2.4vw,14px) 30px}.view.on{display:block}
+.head{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:end;justify-content:space-between;margin-bottom:16px}.head p{max-width:76ch;color:var(--muted);margin-top:6px;font-size:13.5px}
+.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.card.flush{padding:0;overflow:hidden}
+.chead{display:flex;gap:10px 14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.chead h2{display:flex;align-items:center;gap:10px}.chead h2 svg{flex:none}
+.ttl-cyan{color:var(--cyan)!important}
+.panel{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:12px;padding:16px}
+.panel h3:first-child,.panel h2:first-child{margin-top:0}
+.cols{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:980px){.cols{grid-template-columns:minmax(0,1fr)}.cols>.side{order:2}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>input{flex:1 1 70px}
+input[type=text],input[type=number],textarea{font:14px var(--mono);color:var(--ink);background:#060c17;border:1px solid var(--line2);border-radius:8px;padding:9px 12px;min-height:44px;width:100%}
+input::placeholder,textarea::placeholder{color:#4b5f79}
+textarea{font:12.5px var(--mono);min-height:64px;resize:vertical}
+input:focus-visible,button:focus-visible,textarea:focus-visible,a:focus-visible,canvas:focus-visible,summary:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+button{font:700 12px var(--disp);letter-spacing:.08em;text-transform:uppercase;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line2);background:#0b1626;color:var(--sub);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+button:hover{border-color:var(--cyan);color:var(--ink)}
+button.pri{background:linear-gradient(180deg,#0f3a4a,#0b2a37);border-color:rgba(34,211,238,.7);color:#bff4ff;box-shadow:0 0 16px rgba(34,211,238,.18) inset,0 0 12px rgba(34,211,238,.12)}
+button.amb{background:linear-gradient(180deg,#3a2a0c,#2a1e08);border-color:rgba(245,158,11,.7);color:#fde3a7}
+button.blu{background:linear-gradient(180deg,#132a55,#0e1f40);border-color:rgba(59,130,246,.7);color:#cfe0ff}
+button.red{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.6);color:#fecaca}
+button.on{background:rgba(34,211,238,.12);color:var(--cyan);border-color:var(--cyan)}
+button.sm{min-height:36px;padding:0 10px;font:600 11.5px var(--mono);letter-spacing:.02em;text-transform:none}
+button:disabled{opacity:.4;cursor:default}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}.seg button{border:0;border-radius:0}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:8px}.presets button{white-space:normal;line-height:1.25;padding:8px 10px;text-align:left;justify-content:flex-start;font:600 12.5px var(--sans);letter-spacing:0;text-transform:none}.presets b{display:block;font:700 10px var(--mono);color:var(--cyan)}
+.err{color:#fca5a5;font:12.5px var(--mono);min-height:18px;margin-top:4px}
+label.chk{display:flex;gap:8px;align-items:center;font-size:14px;min-height:44px;cursor:pointer;color:var(--sub)}label.chk input{width:18px;height:18px;accent-color:var(--cyan)}
+.stage{position:relative;border-radius:10px;border:1px solid var(--line);background:radial-gradient(ellipse at 50% 30%,#0b1a2c,#04070d 75%);overflow:hidden}
+.stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.s-hero{height:clamp(340px,52vh,560px)}.s-big{height:clamp(360px,60vh,620px)}.s-mid{height:clamp(300px,44vh,440px)}.s-sm{height:300px}
+.ovl{position:absolute;font-size:12px;pointer-events:none}.ovl.tl{left:12px;top:12px}.ovl.br{right:12px;bottom:10px;color:var(--muted);font:11px var(--mono)}.ovl.bl{left:12px;bottom:12px}.ovl.tr{right:12px;top:12px}
+.hud{background:rgba(4,8,15,.82);border:1px solid var(--line2);border-radius:8px;padding:10px 12px;font:500 11.5px/1.8 var(--mono);color:var(--sub);letter-spacing:.04em}.hud b{color:var(--cyan);font-weight:700}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font:700 10.5px var(--mono);letter-spacing:.06em;background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.5)}
+.pill.cy{background:rgba(34,211,238,.1);color:var(--cyan);border-color:rgba(34,211,238,.5)}.pill.rd{background:rgba(239,68,68,.12);color:#fca5a5;border-color:rgba(239,68,68,.5)}.pill.gy{background:rgba(100,116,139,.15);color:#cbd5e1;border-color:rgba(100,116,139,.5)}.pill.or{background:rgba(249,115,22,.14);color:#fdba74;border-color:rgba(249,115,22,.5)}
+.keys{position:absolute;right:10px;bottom:34px;background:#070d18;border:1px solid var(--line2);border-radius:10px;padding:10px 14px;font:12px/1.8 var(--mono);display:none;max-width:280px;z-index:2;color:var(--sub)}
+kbd{font:11px var(--mono);border:1px solid var(--line2);border-radius:5px;padding:1px 5px;background:var(--card);color:var(--cyan)}
+.caption{min-height:52px;padding:12px 14px;border-radius:10px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--grey);font-size:14.5px;margin-top:12px;color:var(--sub)}.caption b{color:var(--ink)}
+.transport{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}.transport input[type=range],input[type=range]{accent-color:var(--cyan)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font:11.5px var(--mono);color:var(--muted);margin-top:10px}.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:20px;height:7px;border-radius:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;font:500 12px var(--mono)}
+.chip{padding:4px 9px;border-radius:6px;background:rgba(34,211,238,.08);color:var(--cyan);border:1px solid rgba(34,211,238,.3)}.chip.gap{background:rgba(245,158,11,.08);color:#fcd34d;border-color:rgba(245,158,11,.4)}
+.chip small{margin-left:6px;padding:1px 6px;border-radius:4px;background:rgba(245,158,11,.85);color:#1a1205;font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+.kpi{position:relative;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:10px;padding:14px 16px 14px 18px;overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c,var(--cyan));box-shadow:0 0 12px var(--c,var(--cyan))}
+.kpi .lbl{display:flex;justify-content:space-between;align-items:center;gap:8px}.kpi b{display:block;font:700 clamp(22px,2.3vw,28px) var(--disp);letter-spacing:.03em;margin:10px 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.tile{position:relative;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:10px;padding:12px 14px 12px 16px;overflow:hidden}.tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cyan)}
+.tile b{display:block;font:700 clamp(20px,2.2vw,26px) var(--disp);white-space:nowrap}.tile span{font:11px var(--mono);color:var(--muted)}
+.meter{height:10px;border-radius:5px;background:#0b1626;border:1px solid var(--line);overflow:hidden;margin:4px 0 10px}.meter i{display:block;height:100%;border-radius:5px;transition:width .4s}
+.hb{display:grid;grid-template-columns:110px minmax(0,1fr) 44px;gap:8px;align-items:center;font-size:13px;margin:7px 0;color:var(--sub)}.hb .meter{margin:0}.hb b{text-align:right;font:700 13px var(--mono);color:var(--ink)}
+.readout{font-size:13.5px;min-height:42px;margin-top:10px;color:var(--sub)}.readout b{color:var(--ink)}
+.tests{list-style:none;margin:10px 0 0;padding:0;font-size:13.5px;display:grid;gap:4px;color:var(--sub)}.tests li{display:flex;gap:8px;align-items:baseline}.tests .p{color:var(--green);font-weight:800}.tests .f{color:var(--red);font-weight:800}
+.log{font:12px/1.65 var(--mono);max-height:360px;overflow:auto;background:#050a13;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:0;white-space:pre;color:var(--sub)}
+.bar{height:8px;border-radius:4px;background:#0b1626;overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.info{font-size:13.5px;margin-top:6px;min-height:20px;color:var(--sub)}.info b{color:var(--ink);font-family:var(--disp)}
+.steps{padding-left:20px;margin:0;display:grid;gap:6px;font-size:13.5px;color:var(--sub)}.steps b{color:var(--ink)}
+.chart2d{height:170px;border:1px solid var(--line);border-radius:8px;background:#050a13;position:relative}.chart2d svg{position:absolute;inset:0;width:100%;height:100%}
+details summary{cursor:pointer;font:600 12px var(--mono);color:var(--muted);min-height:32px;display:flex;align-items:center}
+/* home page */
+.camtabs{display:flex;gap:6px;flex-wrap:wrap}.camtabs button{min-height:34px;padding:0 10px;font:500 11.5px var(--mono);letter-spacing:.02em;text-transform:none}
+.ivstrip{display:flex;gap:0;align-items:center;overflow-x:auto;padding:16px;border:1px solid var(--line);border-radius:10px;background:#050a13;min-height:130px}
+.ivc{flex:none;border:1px solid rgba(45,212,191,.55);border-radius:10px;background:linear-gradient(180deg,rgba(45,212,191,.12),rgba(45,212,191,.03));padding:10px 16px;text-align:center;min-width:118px;box-shadow:0 0 18px rgba(45,212,191,.1)}
+.ivc .n{font:700 10px var(--disp);letter-spacing:.1em;color:var(--teal)}.ivc .v{font:700 16px var(--disp);color:var(--ink);margin:6px 0;white-space:nowrap}.ivc .k{display:inline-block;font:700 10px var(--sans);letter-spacing:.08em;color:#062a24;background:var(--teal);border-radius:999px;padding:2px 9px}
+.ivc.new{border-color:var(--cyan);box-shadow:0 0 22px rgba(34,211,238,.35)}
+.gapc{flex:none;text-align:center;padding:0 12px;font:600 10.5px var(--mono);color:var(--amber);min-width:84px}.gapc hr{border:0;border-top:1px dashed var(--amber);margin:5px 0}.gapc span{color:#c08a2c}
+.iq{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));gap:16px}
+.fieldlbl{display:flex;justify-content:space-between;gap:8px;margin:12px 0 6px}.fieldlbl .desc{font-size:11px}
+.scen{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.sc{text-align:left;display:block;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:#0a1424;min-height:84px;white-space:normal;text-transform:none;letter-spacing:0;font:inherit;color:inherit}
+.sc:hover{border-color:var(--cyan);box-shadow:0 0 14px rgba(34,211,238,.12)}.sc b{display:block;font:700 12.5px var(--disp);color:var(--ink);letter-spacing:.02em;margin-bottom:6px}.sc span{display:block;font:11.5px/1.5 var(--mono);color:var(--muted)}
+.sc .st{margin-top:6px;font:700 10.5px var(--mono)}.sc .st.ok{color:var(--green)}.sc .st.bad{color:var(--red)}.sc .st.run{color:var(--amber)}
+.split{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px}@media(max-width:980px){.split{grid-template-columns:minmax(0,1fr)}}
+.tstat{border:1px solid var(--line);border-radius:10px;background:#050a13;padding:12px}
+.tstat .r{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--sub);margin:4px 0}.tstat .r b{font:700 13px var(--mono);color:var(--teal)}
+.tlist{max-height:330px;overflow:auto;display:grid;gap:8px;margin-top:10px;padding-right:4px}
+.tc{border-left:3px solid var(--teal);background:#0a1424;border-radius:6px;padding:8px 10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px}
+.tc b{font:700 12px var(--sans);color:var(--ink)}.tc .ok{font:700 11px var(--mono);color:var(--green)}.tc .bad{font:700 11px var(--mono);color:var(--red)}.tc span{font:11px var(--mono);color:var(--muted)}.tc.fail{border-left-color:var(--red)}
+table.audit{width:100%;border-collapse:collapse;font:12px var(--mono)}
+table.audit th{font:700 11px var(--disp);letter-spacing:.08em;color:var(--cyan);text-align:left;padding:10px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+table.audit td{padding:9px 10px;border-bottom:1px solid var(--line);color:var(--sub);vertical-align:top}
+table.audit td.id{color:var(--cyan);font-weight:700}table.audit td.ts{color:var(--muted);white-space:nowrap;text-align:right}table.audit th:last-child{text-align:right}
+.op{display:inline-block;font:700 10.5px var(--disp);letter-spacing:.06em;padding:3px 8px;border-radius:5px;border:1px solid;white-space:nowrap}
+.scroll{overflow-x:auto}
+footer{text-align:center;padding:28px 16px 40px;font:12px var(--sans);color:var(--muted);border-top:1px solid var(--line);margin-top:20px}footer b{color:var(--cyan)}
+@media(max-width:600px){table.audit .hide{display:none}.kpi b{font-size:20px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi{padding:12px 12px 12px 14px}.kpi .desc{font-size:11px}
+ .chipglow{display:none}.badge span,#resetAll .t,#sndBtn .t{display:none}.badge{padding:6px 9px}#resetAll{padding:0 10px;min-height:34px}.brand small{display:none}.brand .ic{width:34px;height:34px}.brand b{font-size:16px}header .in{gap:6px 10px}.tabs a{min-height:40px;padding:8px 10px}}
+.view.story-view{max-width:none;padding:0}
+.story{position:relative;height:calc(100vh - var(--hh,112px));min-height:560px;overflow:hidden;background:radial-gradient(ellipse at 50% 35%,#0b1a2c 0%,#04070d 70%)}
+.story canvas{position:absolute;top:0;bottom:0;height:100%;display:block;cursor:grab}
+#cvSA{left:0;width:100%}#cvSB{right:0;width:50%;display:none}.story.split #cvSA{width:50%}.story.split #cvSB{display:block}.story.split::after{content:"";position:absolute;left:50%;top:70px;bottom:120px;border-left:1px dashed rgba(34,211,238,.25)}
+.st-top{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px max(2vw,14px);z-index:3;pointer-events:none}.st-top>*{pointer-events:auto}
+.chap{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.chap button{min-height:40px;padding:0 12px;font:600 12px var(--sans);letter-spacing:.02em;text-transform:none;background:rgba(6,12,22,.7);backdrop-filter:blur(6px)}
+.chap button b{font:800 13px var(--disp);color:var(--muted);margin-right:4px}.chap button.on{border-color:var(--cyan);color:var(--ink)}.chap button.on b{color:var(--cyan)}.chap button.done b{color:var(--teal)}
+.st-ctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.st-ctl button{min-height:40px;background:rgba(6,12,22,.7);backdrop-filter:blur(6px)}
+.st-tag{position:absolute;top:70px;z-index:2;pointer-events:none}.st-tag.l{left:16px}.st-tag.r{left:calc(50% + 16px)}
+.st-narr{position:absolute;left:50%;transform:translateX(-50%);bottom:26px;width:min(860px,92%);text-align:center;z-index:3;pointer-events:none;min-height:84px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
+.st-narr p{font:400 clamp(15px,1.5vw,19px)/1.5 var(--sans);color:#d6e6fa;text-shadow:0 2px 14px #000,0 0 2px #000;transition:opacity .9s,transform .9s;opacity:0;transform:translateY(8px)}.st-narr p.in{opacity:1;transform:none}.st-narr p.old{opacity:.38}.st-narr p.out{opacity:0}
+.st-narr p b{color:var(--cyan);font-weight:600}
+.st-panel{position:absolute;right:max(2vw,14px);bottom:130px;z-index:3;width:min(300px,86vw);display:none}.st-panel.on{display:block}
+.glass{background:rgba(6,12,22,.78);backdrop-filter:blur(8px);border:1px solid var(--line2);border-radius:12px;padding:14px}
+.holdbtn{width:100%;min-height:64px;font-size:13px;border-color:var(--cyan);color:var(--cyan);touch-action:none;user-select:none;-webkit-user-select:none}.holdbtn.on{background:rgba(34,211,238,.18);box-shadow:0 0 22px rgba(34,211,238,.35)}
+.st-hud{position:absolute;left:max(2vw,14px);bottom:130px;z-index:3;display:none;width:min(340px,86vw)}.st-hud.on{display:block}
+.memrow{margin:6px 0 10px}.memrow .lbl{display:flex;justify-content:space-between}.memrow b{font:700 18px var(--disp);display:block;margin-top:4px}
+.st-over{position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at center,rgba(4,7,13,.25),rgba(4,7,13,.85))}.st-over.on{display:flex}
+.st-enter .box{text-align:center;max-width:640px}.st-enter h1{font-size:clamp(32px,6vw,64px);letter-spacing:.06em;background:linear-gradient(90deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.st-enter p{color:var(--sub);margin:14px auto 26px;font-size:clamp(15px,1.6vw,18px);max-width:52ch}.st-enter .eyebrow{font:600 12px var(--mono);color:var(--teal);letter-spacing:.14em}
+.bigbtn{min-height:56px;padding:0 28px;font-size:14px}
+.st-end .box{width:min(860px,100%)}.endgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0}
+.endgrid .kpi b{font-size:clamp(18px,2vw,24px)}
+@media(max-width:700px){.story.split #cvSA{width:100%;height:50%}.story.split #cvSB{width:100%;height:50%;top:50%}.story.split::after{display:none}.st-tag.r{left:16px;top:calc(50% + 10px)}.st-panel{bottom:120px;right:10px}.st-hud{bottom:auto;top:110px;left:10px}.chap button span{display:none}}
+body.story-on footer{display:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<header class="top"><div class="in">
+ <a class="brand" href="#index"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span><b>WAREHOUSE IQ</b><small>Every arrival counts. Every gap matters.</small></span></a>
+ <nav class="tabs" aria-label="Sections">
+  <a href="#story">▶ Story</a><a href="#index">Warehouse</a><a href="#tree">Index tree</a><a href="#dashboard">Dashboard</a><a href="#compare">AVL vs Unbalanced</a><a href="#bridge">Bridge demo</a><a href="#tests">Tests</a><a href="#data">Log and share</a></nav>
+ <div class="hright"><button class="sm" id="sndBtn" aria-pressed="false" title="Sound (off by default)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path id="sndWave" d="M16 9a5 5 0 0 1 0 6" opacity=".25"/></svg><span class="t">Sound off</span></button><span class="chipglow"><i></i>AVL TREE · O(log k)</span>
+  <button class="badge" id="invBadge" title="Invariant check"><i></i><span>Invariants OK</span></button><button class="badge" id="orcBadge" title="Brute-force cross-check"><i></i><span>Brute force OK</span></button>
+  <button class="red sm" id="resetAll" aria-label="Reset warehouse"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="t">Reset warehouse</span></button></div>
+</div></header>
+
+<!-- ============ STORY ============ -->
+<section class="view story-view" id="v-story" aria-label="Story mode">
+ <div class="story" id="story">
+  <canvas id="cvSA" aria-label="Story 3D view"></canvas><canvas id="cvSB" aria-label="Story 3D view, right"></canvas>
+  <span class="st-tag l" id="tagA"></span><span class="st-tag r" id="tagB"></span>
+  <div class="st-top"><ol class="chap" id="chap">
+    <li><button data-ch="1"><b>1</b><span>Arrivals</span></button></li><li><button data-ch="2"><b>2</b><span>Bridges</span></button></li>
+    <li><button data-ch="3"><b>3</b><span>The vast gaps</span></button></li><li><button data-ch="4"><b>4</b><span>Balance</span></button></li></ol>
+   <div class="st-ctl"><button class="sm" id="stAuto" aria-pressed="true">Auto: on</button><button class="pri sm" id="stNext">Next ▸</button><button class="sm" id="stSkip">Skip chapter</button><button class="sm" id="stKeysBtn">?</button></div></div>
+  <div class="keys" id="stKeys" style="top:64px;right:16px;bottom:auto"><b style="color:var(--ink)">Story keys</b><br><kbd>Space</kbd> next step<br><kbd>1</kbd>–<kbd>4</kbd> jump to a chapter<br><kbd>←</kbd> <kbd>→</kbd> undo and redo (chapter 1)<br><kbd>?</kbd> show or hide this</div>
+  <div class="st-panel glass" id="stP1"><div class="lbl" style="margin-bottom:8px">Your turn</div>
+   <button class="pri holdbtn" id="stHold">Press and hold to stream arrivals</button>
+   <div class="row" style="margin-top:10px"><input type="text" id="stId" inputmode="numeric" placeholder="Type an ID" aria-label="Package ID"><button class="sm" id="stAdd">Add</button></div><div class="err" id="stErr"></div>
+   <div class="row"><button class="sm" id="stUndo">← Undo</button><button class="sm" id="stRedo">Redo →</button></div></div>
+  <div class="st-panel glass" id="stP3"><div class="lbl" style="margin-bottom:8px">Number line scale</div><div class="seg"><button id="stLin" class="on">Linear</button><button id="stCmp">Compressed</button></div></div>
+  <div class="st-hud glass" id="stHud"></div>
+  <div class="st-narr" id="stNarr" aria-live="polite"></div>
+  <div class="st-over st-enter on" id="stEnter"><div class="box"><div class="eyebrow">PROBLEM STATEMENT 09 · A STORY IN FOUR CHAPTERS</div><h1>Live Arrival Index</h1>
+   <p>Packages arrive out of order. One small tree keeps them as sorted ranges, finds every gap, and never grows bigger than the number of ranges.</p>
+   <div class="row" style="justify-content:center"><button class="pri bigbtn" id="stGo">Enter the warehouse</button><button class="bigbtn" id="stFree">Skip to free explore</button></div></div></div>
+  <div class="st-over st-end" id="stEnd"><div class="box glass" style="padding:24px"><div class="eyebrow" style="font:600 12px var(--mono);color:var(--teal);letter-spacing:.14em">THE END · VERIFIED</div><h1 class="ttl-cyan" style="margin-top:8px">The warehouse holds</h1>
+   <div class="endgrid" id="endGrid"></div><div class="bar"><i id="endBar"></i></div><p class="desc" id="endNote" style="margin-top:8px"></p>
+   <div class="row" style="margin-top:16px"><button class="pri" id="stRestart">Restart the story</button><a href="#index" style="text-decoration:none"><button>Explore freely</button></a><a href="#tests" style="text-decoration:none"><button>See all tests</button></a></div></div></div>
+ </div>
+</section>
+
+<!-- ============ WAREHOUSE (HOME) ============ -->
+<section class="view" id="v-index" aria-label="Warehouse">
+ <div class="kpis">
+  <div class="kpi" style="--c:var(--cyan)"><div class="lbl">Unique packages<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d6a26b" stroke-width="2" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg></div><b id="kU">0</b><div class="desc">Total distinct IDs recorded</div></div>
+  <div class="kpi" style="--c:var(--teal)"><div class="lbl">Active intervals<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a9b8cc" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div><b id="kI">0</b><div class="desc">Maximal consecutive ranges</div></div>
+  <div class="kpi" style="--c:var(--amber)"><div class="lbl"><span id="kMl">Missing in range</span><svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b" aria-hidden="true"><path d="M12 2 1 21h22z"/><path d="M12 9v5M12 17v.5" stroke="#1a1205" stroke-width="2.4"/></svg></div><b id="kM">0 MISSING</b><div class="desc" id="kMd">Gaps between the first and last ID</div></div>
+  <div class="kpi" style="--c:var(--violet)"><div class="lbl">Duplicate arrivals<svg width="16" height="16" viewBox="0 0 24 24" fill="#3b82f6" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5z"/></svg></div><b id="kD">0</b><div class="desc">Ignored without interval modification</div></div>
+  <div class="kpi" style="--c:var(--blue)"><div class="lbl">Lookup complexity<svg width="16" height="16" viewBox="0 0 24 24" fill="#f97316" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div><b id="kC">O(log k)</b><div class="desc" id="kCd">Max comparisons ≈ 0 steps</div></div>
+ </div>
+
+ <div class="card">
+  <div class="chead"><h2 class="ttl-cyan">3D warehouse inventory hangar <span class="pill cy" style="font-size:9.5px">LIVE SIMULATION</span></h2>
+   <div class="camtabs" role="group" aria-label="Camera"><button class="on" data-cam="overview">Overview cam</button><button data-cam="scanner">Scanner cam</button><button data-cam="bays">Interval bays</button><button data-cam="top">Top-down</button><button data-cam="orbit">Auto orbit</button></div></div>
+  <div class="stage s-hero"><canvas id="cvHangar" aria-label="3D warehouse: one rack per range, one box per package, empty bays for missing IDs"></canvas>
+   <div class="ovl bl hud" id="hud">UNIQUE ARRIVALS: <b>0</b><br>ACTIVE INTERVALS (k): <b>0</b><br>DUPLICATES FILTERED: <b>0</b></div>
+   <div class="ovl tl hud" id="hangHover" style="display:none"></div>
+   <span class="ovl br">Drag to orbit · scroll to zoom · right-drag to pan · hover a rack</span></div>
+  <p class="desc" id="hangCap" style="margin-top:10px">Racks hold up to 12 boxes; a bigger range shows its full count on the label.</p>
+ </div>
+
+ <div class="card" style="margin-top:16px">
+  <div class="chead"><div><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="12" height="12" rx="2"/><path d="M8 20h12V8"/></svg>Live interval index &amp; consecutive ranges</h2><p class="small muted" style="margin-top:4px">Sorted, non-overlapping maximal consecutive intervals. Missing IDs remain separated until bridged.</p></div></div>
+  <div class="ivstrip" id="ivStrip"></div>
+ </div>
+
+ <div class="iq" style="margin-top:16px">
+  <div class="card"><div class="chead"><h2>Receive packages</h2></div>
+   <div class="fieldlbl"><span class="lbl">Package ID</span><span class="desc">Non-negative integer [0 .. 10⁹]</span></div>
+   <div class="row"><input type="text" id="hPkg" inputmode="numeric" placeholder="Enter ID (e.g. 5)" aria-label="Package ID"><button class="pri" id="hAdd"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 2v20l18-10z"/></svg>Add package</button></div>
+   <div class="fieldlbl"><span class="lbl">Quick arrivals</span></div>
+   <div class="row"><button class="sm" id="hNext">+ Next ID</button><button class="sm" id="hRand">Random (1–100)</button><button class="sm" id="hBig">1,000,000,000</button></div>
+   <div class="fieldlbl"><span class="lbl">Batch arrivals</span><span class="desc">Comma or space separated list</span></div>
+   <div class="row"><input type="text" id="hBatch" placeholder="e.g. 1, 3, 7, 2, 6" aria-label="Batch of package IDs"><button class="blu" id="hBatchBtn">Batch ingest</button></div>
+   <div class="err" id="hErr"></div></div>
+  <div class="card"><div class="chead"><h2>Gap analysis</h2></div>
+   <div class="row" style="align-items:end"><div style="flex:1 1 120px"><div class="lbl" style="margin-bottom:6px">Start ID</div><input type="number" id="hS" value="1" aria-label="Start ID"></div>
+    <div style="flex:1 1 120px"><div class="lbl" style="margin-bottom:6px">End ID</div><input type="number" id="hE" value="10" aria-label="End ID"></div>
+    <button class="amb" id="hAnalyze">Analyze gaps</button><button class="sm" id="hClearQ">Clear</button></div>
+   <div class="row" style="margin-top:12px"><span class="lbl">Presets:</span><button class="sm" data-q="1,10">[1 .. 10]</button><button class="sm" data-q="1,100">[1 .. 100]</button><button class="sm" data-q="2,9">[2 .. 9]</button><button class="sm" data-q="0,1000">[0 .. 1000]</button></div>
+   <div class="err" id="hQErr"></div>
+   <div style="border:1px solid var(--line);border-radius:10px;background:#050a13;padding:12px;min-height:70px;margin-top:6px"><div class="lbl" id="hQTitle" style="margin-bottom:8px">Missing ranges</div><div class="chips" id="hGaps"><span class="desc">Press "Analyze gaps" to look inside a window.</span></div></div></div>
+ </div>
+
+ <div class="split" style="margin-top:16px">
+  <div class="card"><div class="chead"><div><h2><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#22d3ee"/><path d="M10 8v8l6-4z" fill="#04121a"/></svg>Demonstration mode (preset scenarios)</h2><p class="small muted" style="margin-top:4px">Each scenario resets the warehouse, plays its arrivals through the real AVL index, and checks the result against the expected ranges.</p></div></div>
+   <div class="scen" id="scen"></div></div>
+  <div class="card"><div class="chead"><div><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>Mandatory algorithm tests</h2><p class="small muted" style="margin-top:4px"><span id="hTCount">21</span> automated invariant verifications</p></div><button class="pri" id="hRunTests">Run tests</button></div>
+   <div class="tstat"><div class="r"><span>Test status</span><b id="hTStat">Not run yet</b></div><div class="r"><span>Total benchmark time</span><b id="hTTime">–</b></div>
+    <div class="tlist" id="hTList"></div></div></div>
+ </div>
+
+ <div class="card" style="margin-top:16px">
+  <div class="chead"><div><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>Live arrival history audit trail</h2><p class="small muted" style="margin-top:4px">Chronological stream of incoming packages, operations, interval mutations, and timestamps. Newest first.</p></div></div>
+  <div class="scroll"><table class="audit"><thead><tr><th>Seq #</th><th>Package ID</th><th>Operation</th><th class="hide">Result description</th><th>Timestamp</th></tr></thead><tbody id="audit"></tbody></table></div>
+ </div>
+</section>
+
+<!-- ============ INDEX TREE ============ -->
+<section class="view" id="v-tree" aria-labelledby="h-tree">
+ <div class="head"><div><h1 id="h-tree" class="ttl-cyan">Index tree</h1><p>The AVL tree behind the warehouse. Each node is one range; the track below is the number line. Watch the search path, the case, and every rotation. Click a node or a block to link them.</p></div></div>
+ <div class="cols">
+ <aside class="panel side">
+  <h3>Packages arrive</h3>
+  <div class="row"><input type="text" id="ids" placeholder="1, 3, 7, 2, 6" aria-label="Package IDs, comma separated"><button class="pri" id="addBtn">Add</button></div>
+  <div class="err" id="idsErr"></div>
+  <h3>Range query</h3>
+  <div class="row"><input type="number" id="qL" placeholder="From" aria-label="Query from"><input type="number" id="qR" placeholder="To" aria-label="Query to"></div>
+  <div class="row" style="margin-top:8px"><button class="amb" id="qBtn">Show gaps</button><button id="qClear">Clear</button></div>
+  <div class="err" id="qErr"></div>
+  <h3>Presets</h3>
+  <div class="presets"><button data-p="1"><b>1</b>Problem example</button><button data-p="2"><b>2</b>Bridge merge</button><button data-p="3"><b>3</b>Sparse IDs</button><button data-p="4"><b>4</b>Sorted input</button></div>
+  <h3>Tree mode</h3><div class="seg" role="group" aria-label="Balance mode"><button id="mAVL" class="on">AVL</button><button id="mUnb">Unbalanced</button></div>
+  <h3>Track scale</h3><div class="seg" role="group" aria-label="Scale"><button id="sLin" class="on">Linear</button><button id="sCmp">Compressed</button></div>
+  <label class="chk"><input type="checkbox" id="dbg"> Show height and balance</label>
+  <details><summary>More operations</summary>
+   <h3>Insert a whole range</h3><div class="row"><input type="number" id="rL" placeholder="From" aria-label="Range from"><input type="number" id="rR" placeholder="To" aria-label="Range to"><button id="rBtn">Insert</button></div>
+   <h3>Remove one ID</h3><div class="row"><input type="number" id="dX" placeholder="ID" aria-label="ID to remove"><button class="red" id="dBtn">Remove</button></div>
+   <div class="err" id="moreErr"></div></details>
+  <div class="row" style="margin-top:12px"><button id="undo">Undo</button><button id="redo">Redo</button><button class="red" id="reset">Reset</button></div>
+ </aside>
+ <div>
+  <div class="stage s-big"><canvas id="cvIndex" tabindex="0" aria-label="3D view of the interval tree and number-line track"></canvas>
+   <span class="ovl tl"><span class="pill" id="capBadge" style="display:none"></span></span>
+   <span class="ovl br" id="hintIdx">Drag to orbit · right-drag to pan · scroll to zoom · double-click to reset · ? for keys</span>
+   <div class="keys" id="keys"><b style="color:var(--ink)">Keyboard</b><br><kbd>Space</kbd> play, pause or step<br><kbd>←</kbd> <kbd>→</kbd> undo and redo<br><kbd>1</kbd>–<kbd>4</kbd> presets<br><kbd>?</kbd> show or hide this</div></div>
+  <div class="caption" id="caption" aria-live="polite">Add package IDs, or press preset 1 to play the example from the problem statement.</div>
+  <div class="transport"><button id="play" class="on">Pause</button><button id="step">Step</button>
+   <label class="lbl" for="speed">Speed</label><input type="range" id="speed" min="0.25" max="4" step="0.25" value="1" style="width:130px"><span class="mono small" id="speedOut">1×</span>
+   <span class="desc" id="queueOut"></span><button id="fit">Reset view</button></div>
+  <div class="legend"><span><i style="background:#3b82f6"></i>New range</span><span><i style="background:#22c55e"></i>Extended</span><span><i style="background:#f97316"></i>Bridge merge</span><span><i style="background:#64748b"></i>Duplicate</span><span><i style="background:#8b5cf6"></i>Range or removal</span><span><i style="background:repeating-linear-gradient(90deg,#ef4444 0 4px,transparent 4px 7px)"></i>Missing</span><span><i style="background:#f59e0b"></i>Search path</span></div>
+  <div class="grid">
+   <div class="panel"><h2 id="ivTitle">Arrived ranges</h2><div class="chips" id="ivList" style="margin-top:10px"></div><h3 id="gapTitle">Missing between them</h3><div class="chips" id="gapList"></div></div>
+   <div class="panel"><h2>Selected node</h2><div class="info" id="selInfo"><span class="muted">Click a node or a block in the 3D view.</span></div></div>
+  </div>
+ </div></div>
+</section>
+
+<!-- ============ DASHBOARD ============ -->
+<section class="view" id="v-dashboard" aria-labelledby="h-dash">
+ <div class="head"><div><h1 id="h-dash" class="ttl-cyan">Dashboard</h1><p>Live numbers for the warehouse index. Every update touches about log₂ k nodes, and memory follows the number of ranges, not the size of the IDs.</p></div></div>
+ <div class="tiles">
+  <div class="tile"><b id="tN">0</b><span>ranges stored</span></div><div class="tile"><b id="tIds">0</b><span>IDs covered</span></div>
+  <div class="tile"><b id="tH">0</b><span>tree height</span></div><div class="tile"><b id="tB">0</b><span>AVL bound 1.44 log₂(n+2)</span></div>
+  <div class="tile"><b id="tOps">0</b><span>operations</span></div><div class="tile"><b id="tRot">0</b><span>rotations</span></div></div>
+ <div class="grid2">
+  <div class="panel"><h2>Nodes visited per operation</h2><p class="desc" style="margin-top:6px">Last 40 operations, coloured by case. An insert runs two searches (floor and higher), so the amber line is 2 log₂ n. Hover a bar.</p>
+   <div class="stage s-mid" style="margin-top:10px"><canvas id="cvVisits" aria-label="3D bar chart of nodes visited per operation"></canvas></div><div class="readout" id="visRead"></div></div>
+  <div class="panel"><h2>Memory: tree against a plain array</h2><p class="desc" style="margin-top:6px">Log scale; each grid step is ten times more. Hover a tower.</p>
+   <div class="stage s-mid" style="margin-top:10px"><canvas id="cvMem" aria-label="3D towers comparing memory"></canvas></div><div class="readout" id="memRead"></div></div>
+  <div class="panel"><h2>Cases so far</h2><div id="caseBars" style="margin-top:10px"></div></div>
+  <div class="panel"><h2>Height against the AVL bound</h2><p class="small" id="hTxt" style="margin-top:8px;color:var(--sub)"></p><div class="meter"><i id="hBar" style="background:var(--cyan)"></i></div>
+   <p class="desc">In AVL mode the height stays under the bound. Switch to Unbalanced on the Index tree page and run preset 4 to watch it climb.</p>
+   <h3>Height over time</h3><div class="chart2d" id="hChartBox"><svg id="hChart"></svg></div></div>
+ </div>
+</section>
+
+<!-- ============ COMPARE ============ -->
+<section class="view" id="v-compare" aria-labelledby="h-cmp">
+ <div class="head"><div><h1 id="h-cmp" class="ttl-cyan">AVL vs Unbalanced</h1><p>The same IDs go into two trees. The left one rotates to stay balanced; the right one never does. Sorted input is the worst case for the right one.</p></div></div>
+ <div class="panel"><div class="row">
+  <div class="seg" role="group" aria-label="Input"><button id="cSorted" class="on">Sorted</button><button id="cRandom">Random</button><button id="cCustom">My own</button></div>
+  <label class="lbl" for="cN">How many</label><input type="range" id="cN" min="4" max="40" step="1" value="15" style="width:150px"><span class="mono small" id="cNOut">15</span>
+  <input type="text" id="cList" placeholder="5, 9, 1, 30" aria-label="Your own IDs" style="display:none;flex:1 1 200px">
+  <button class="pri" id="cPlay">Play</button><button id="cReset">Reset</button></div><div class="err" id="cErr"></div>
+  <p class="desc" id="cDesc">Sorted: 2, 4, 6 … (spaced so they never merge into one range).</p></div>
+ <div class="grid2" style="margin-top:16px">
+  <div><div class="stage s-mid"><canvas id="cvA" aria-label="AVL tree"></canvas><span class="ovl tl"><span class="pill cy">AVL</span></span></div>
+   <div class="panel" style="margin-top:10px"><p class="small" id="cAtxt" style="color:var(--sub)"></p><div class="meter"><i id="cAbar" style="background:var(--cyan)"></i></div></div></div>
+  <div><div class="stage s-mid"><canvas id="cvB" aria-label="Unbalanced tree"></canvas><span class="ovl tl"><span class="pill rd">UNBALANCED</span></span></div>
+   <div class="panel" style="margin-top:10px"><p class="small" id="cBtxt" style="color:var(--sub)"></p><div class="meter"><i id="cBbar" style="background:var(--red)"></i></div></div></div>
+ </div>
+</section>
+
+<!-- ============ BRIDGE ============ -->
+<section class="view" id="v-bridge" aria-labelledby="h-br">
+ <div class="head"><div><h1 id="h-br" class="ttl-cyan">Bridge demo</h1><p>One missing ID joins two ranges. Only its two neighbours are checked, and two nodes become one. Everything else in the tree stays as it was.</p></div></div>
+ <div class="panel"><div class="row">
+  <span class="lbl">Left range</span><input type="number" id="bA" value="1" aria-label="Left range from" style="max-width:110px"><input type="number" id="bB" value="3" aria-label="Left range to" style="max-width:110px">
+  <span class="lbl">Right range</span><input type="number" id="bC" value="5" aria-label="Right range from" style="max-width:110px"><input type="number" id="bD" value="8" aria-label="Right range to" style="max-width:110px">
+  <input type="text" id="bOther" value="12-14, 20, 26-30" aria-label="Other ranges" style="flex:1 1 180px"><button id="bBuild">Set up</button><button class="pri" id="bPlay">Add the missing ID</button></div>
+  <div class="err" id="bErr"></div><p class="desc">The right range must start exactly two after the left one ends, so a single ID is missing. The last box holds other ranges, which stay untouched.</p></div>
+ <div class="grid2" style="margin-top:16px">
+  <div><div class="stage s-mid"><canvas id="cvB0" aria-label="Before the bridge"></canvas><span class="ovl tl"><span class="pill gy">BEFORE</span></span></div></div>
+  <div><div class="stage s-mid"><canvas id="cvB1" aria-label="After the bridge"></canvas><span class="ovl tl"><span class="pill or">AFTER</span></span></div></div>
+ </div>
+ <div class="panel" style="margin-top:16px"><h2>What happened</h2><ol class="steps" id="bSteps" style="margin-top:10px"><li class="muted">Press "Add the missing ID".</li></ol></div>
+</section>
+
+<!-- ============ TESTS ============ -->
+<section class="view" id="v-tests" aria-labelledby="h-t">
+ <div class="head"><div><h1 id="h-t" class="ttl-cyan">Tests</h1><p>Bridge merges, duplicates, sparse IDs, edges, every rotation type, range insert, delete splitting, and 10,000 random operations checked against a brute-force version.</p></div></div>
+ <div class="grid2">
+  <div class="panel"><h2>Test suite</h2><div class="row" style="margin-top:10px"><button class="pri" id="runTests">Run all tests</button><button class="red" id="bug">Inject a bug</button></div>
+   <p class="desc" id="testSum" style="margin-top:10px">Not run yet.</p><ul class="tests" id="tests"></ul></div>
+  <div class="panel"><h2>Stress test: 50,000 random IDs</h2><p class="desc" style="margin-top:6px">IDs from 0 to 1,000,000,000, inserted into a separate tree. The view shows its top 5 levels.</p>
+   <div class="row" style="margin-top:10px"><button class="pri" id="stress">Run stress test</button></div>
+   <div class="bar" style="margin-top:12px"><i id="stressBar"></i></div><p class="small" id="stressOut" style="margin-top:8px;color:var(--sub)"></p>
+   <div class="stage s-sm" style="margin-top:10px"><canvas id="cvStress" aria-label="Top of the stress-test tree"></canvas><span class="ovl tl"><span class="pill" id="stressCap" style="display:none"></span></span><span class="ovl br">Scroll or pinch to zoom in and read the labels</span></div>
+   <h3>Height as IDs arrive</h3><div class="chart2d" id="sChartBox"><svg id="sChart"></svg></div></div>
+ </div>
+ <div class="panel" style="margin-top:16px"><h2>Benchmark</h2>
+  <p class="desc" style="margin-top:6px">AVL inserts at n = 1,000 · 10,000 · 100,000 (hard cap), random IDs and sorted IDs 2, 4, 6 …, in chunks of 5,000 so the page stays responsive. Visited nodes count both searches (floor and higher).</p>
+  <div class="row" style="margin-top:10px"><button class="pri" id="benchBtn">Run benchmark</button><span class="desc" id="benchNote"></span></div>
+  <div class="scroll" style="margin-top:10px"><table class="audit"><thead><tr><th>Input</th><th>n</th><th>Total ms</th><th>Avg visited / insert</th><th>Height</th><th>1.44·log₂(n+2)</th></tr></thead><tbody id="benchBody"></tbody></table></div></div>
+</section>
+
+<!-- ============ DATA ============ -->
+<section class="view" id="v-data" aria-labelledby="h-d">
+ <div class="head"><div><h1 id="h-d" class="ttl-cyan">Log and share</h1><p>Every operation in order, a share code that rebuilds the same warehouse anywhere, and the five-minute demo script.</p></div></div>
+ <div class="grid2">
+  <div class="panel"><h2>Operation log</h2><pre class="log" id="log" style="margin-top:10px"></pre>
+   <div class="row" style="margin-top:10px"><button id="copyLog">Copy log</button><button id="copyJson">Copy ranges as JSON</button></div><p class="desc" id="copyOut" style="margin-top:6px"></p></div>
+  <div class="panel"><h2>Share this state</h2><p class="desc" style="margin-top:6px">The code lists every operation. Paste it below on any device to rebuild the same warehouse.</p>
+   <textarea id="shareCode" readonly aria-label="Share code" style="margin-top:8px"></textarea>
+   <div class="row" style="margin-top:8px"><button id="copyShare">Copy share code</button></div>
+   <h3>Import a code</h3><textarea id="importCode" aria-label="Paste a share code"></textarea>
+   <div class="row" style="margin-top:8px"><button class="pri" id="importBtn">Load</button></div><div class="err" id="importErr"></div>
+   <h3>Five-minute demo script</h3><ol class="steps">
+    <li><b>Warehouse:</b> scenario 1, the problem's example. Switch the hangar cameras.</li>
+    <li><b>Bridge demo:</b> one ID joins two ranges; only two neighbours are checked.</li>
+    <li><b>Warehouse:</b> scenario 7, sparse IDs. Then the Dashboard memory towers.</li>
+    <li><b>AVL vs Unbalanced:</b> play sorted input and compare the heights.</li>
+    <li><b>Index tree:</b> insert a whole range, then remove one ID from its middle.</li>
+    <li><b>Tests:</b> run all tests, then the 50,000-ID stress test.</li></ol></div>
+ </div>
+ <details class="panel" style="margin-top:16px" id="invDetails"><summary>Invariant and cross-check details</summary><p class="small" id="invText" style="margin-top:6px;color:var(--sub)"></p></details>
+</section>
+
+<footer>WAREHOUSE IQ • Problem Statement 09 – The Warehouse's Broken Number Ranges<br>Incremental AVL balanced binary search tree indexing • Time: <b>O(log k)</b> • Space: <b>O(k)</b></footer>
+
+<script>
+const MAXID=1e9;
+class IntervalIndex{
+  constructor(balanced=true){this.root=null;this.balanced=balanced;this.count=0;this.uid=1;this.visits=0;this.rot=[];}
+  hh(n){return n?n.h:0}
+  upd(n){n.h=1+Math.max(this.hh(n.l),this.hh(n.r))}
+  rotR(n){const l=n.l;n.l=l.r;l.r=n;this.upd(n);this.upd(l);return l}
+  rotL(n){const r=n.r;n.r=r.l;r.l=n;this.upd(n);this.upd(r);return r}
+  fix(n){
+    this.upd(n);if(!this.balanced)return n;
+    const b=this.hh(n.l)-this.hh(n.r),at=[n.s,n.e];
+    if(b>1){if(this.hh(n.l.l)>=this.hh(n.l.r)){this.rot.push({type:'LL',at});return this.rotR(n)}
+      this.rot.push({type:'LR',at});n.l=this.rotL(n.l);return this.rotR(n)}
+    if(b<-1){if(this.hh(n.r.r)>=this.hh(n.r.l)){this.rot.push({type:'RR',at});return this.rotL(n)}
+      this.rot.push({type:'RL',at});n.r=this.rotR(n.r);return this.rotL(n)}
+    return n;
+  }
+  addNode(s,e){
+    const ins=n=>{if(!n){this.count++;return{id:this.uid++,s,e,h:1,l:null,r:null}}
+      if(s<n.s)n.l=ins(n.l);else n.r=ins(n.r);return this.fix(n)};
+    this.root=ins(this.root);
+  }
+  removeNode(s){
+    const del=(n,k)=>{if(!n)return null;
+      if(k<n.s)n.l=del(n.l,k);else if(k>n.s)n.r=del(n.r,k);
+      else{if(!n.l||!n.r){this.count--;return n.l||n.r}
+        let m=n.r;while(m.l)m=m.l;n.s=m.s;n.e=m.e;n.id=m.id;n.r=del(n.r,m.s)}
+      return this.fix(n)};
+    this.root=del(this.root,s);
+  }
+  floor(x,path){let n=this.root,b=null;while(n){this.visits++;if(path)path.push(n.id);if(n.s<=x){b=n;n=n.r}else n=n.l}return b}
+  higher(x,path){let n=this.root,b=null;while(n){this.visits++;if(path)path.push(n.id);if(n.s>x){b=n;n=n.l}else n=n.r}return b}
+  collect(lo,hi){const out=[];const w=n=>{if(!n)return;this.visits++;if(n.s>lo)w(n.l);if(n.s<=hi&&n.e>=lo)out.push(n);if(n.s<=hi)w(n.r)};w(this.root);return out}
+  insert(x){
+    this.rot=[];const v0=this.visits,fp=[],hp=[];
+    const L=this.floor(x,fp),R=this.higher(x,hp);const vis=this.visits-v0;
+    const res={op:'insert',x,floor:L?[L.s,L.e]:null,higher:R?[R.s,R.e]:null,floorId:L?L.id:null,higherId:R?R.id:null,path:[...new Set([...fp,...hp])]};
+    if(L&&L.e>=x){res.kind='DUPLICATE'}
+    else{const lt=!!(L&&L.e===x-1),rt=!!(R&&R.s===x+1);
+      if(lt&&rt){const e=R.e;this.removeNode(R.s);const n=this.floor(x);n.e=e;res.kind='BRIDGE';res.result=[n.s,n.e];res.id=n.id}
+      else if(lt){L.e=x;res.kind='EXTEND_RIGHT';res.result=[L.s,L.e];res.id=L.id}
+      else if(rt){R.s=x;res.kind='EXTEND_LEFT';res.result=[R.s,R.e];res.id=R.id}
+      else{this.addNode(x,x);res.kind='NEW';res.result=[x,x];res.id=this.floor(x).id}}
+    res.rot=this.rot;res.visited=vis;return res;
+  }
+  insertRange(a,b){
+    this.rot=[];const v0=this.visits;const hit=this.collect(a-1,b+1);const vis=this.visits-v0;
+    let s=a,e=b;if(hit.length){s=Math.min(a,hit[0].s);e=Math.max(b,hit[hit.length-1].e)}
+    const absorbed=hit.map(n=>[n.s,n.e]);for(const [k] of absorbed)this.removeNode(k);
+    this.addNode(s,e);const n=this.floor(s);
+    return{op:'range',L:a,R:b,kind:'RANGE',absorbed,result:[s,e],id:n.id,rot:this.rot,visited:vis,path:[]};
+  }
+  delete(x){
+    this.rot=[];const v0=this.visits,path=[];const n=this.floor(x,path);const vis=this.visits-v0;const res={op:'delete',x,path,floorId:n?n.id:null};
+    if(!n||n.e<x){res.kind='NOT_PRESENT'}
+    else{const was=[n.s,n.e];res.was=was;
+      if(n.s===n.e){this.removeNode(n.s);res.kind='REMOVED';res.result=[]}
+      else if(x===n.s){n.s=x+1;res.kind='SHRINK';res.result=[[n.s,n.e]];res.id=n.id}
+      else if(x===n.e){n.e=x-1;res.kind='SHRINK';res.result=[[n.s,n.e]];res.id=n.id}
+      else{const e=n.e;n.e=x-1;this.addNode(x+1,e);res.kind='SPLIT';res.result=[[was[0],x-1],[x+1,e]];res.id=this.floor(x+1).id}}
+    res.rot=this.rot;res.visited=vis;return res;
+  }
+  query(a,b){
+    if(!(a<=b))throw new Error('L must be ≤ R');
+    const v0=this.visits;const ivs=this.collect(a,b).map(n=>[Math.max(a,n.s),Math.min(b,n.e)]);
+    const gaps=[];let c=a;for(const [s,e] of ivs){if(s>c)gaps.push([c,s-1]);c=e+1}if(c<=b)gaps.push([c,b]);
+    return{intervals:ivs,gaps,visited:this.visits-v0};
+  }
+  intervals(){const out=[],st=[];let n=this.root;while(n||st.length){while(n){st.push(n);n=n.l}n=st.pop();out.push([n.s,n.e]);n=n.r}return out}
+  height(){return this.hh(this.root)}
+  setBalanced(b){
+    this.balanced=b;if(!b)return;
+    const iv=this.intervals();const build=(lo,hi)=>{if(lo>hi)return null;const m=(lo+hi)>>1;
+      const n={id:this.uid++,s:iv[m][0],e:iv[m][1],l:build(lo,m-1),r:build(m+1,hi),h:1};this.upd(n);return n};
+    this.root=build(0,iv.length-1);
+  }
+  check(){
+    const errs=[];let cnt=0;
+    const w=n=>{if(!n)return 0;cnt++;const a=w(n.l),b=w(n.r);const h=1+Math.max(a,b);
+      if(n.h!==h)errs.push('stale height at ['+n.s+','+n.e+']');
+      if(this.balanced&&Math.abs(a-b)>1)errs.push('AVL balance broken at ['+n.s+','+n.e+']');
+      if(n.s>n.e)errs.push('start > end at ['+n.s+','+n.e+']');return h};
+    w(this.root);
+    const iv=this.intervals();for(let i=1;i<iv.length;i++)if(!(iv[i-1][1]+1<iv[i][0]))errs.push('['+iv[i-1]+'] and ['+iv[i]+'] overlap or touch');
+    if(cnt!==this.count)errs.push('node count '+cnt+' ≠ '+this.count);
+    return errs;
+  }
+}
+class Oracle{
+  constructor(){this.iv=[]}
+  norm(){this.iv.sort((a,b)=>a[0]-b[0]);const o=[];for(const [s,e] of this.iv){const t=o[o.length-1];if(t&&s<=t[1]+1)t[1]=Math.max(t[1],e);else o.push([s,e])}this.iv=o}
+  insert(x){this.iv.push([x,x]);this.norm()}
+  insertRange(a,b){this.iv.push([a,b]);this.norm()}
+  delete(x){const o=[];for(const [s,e] of this.iv){if(x<s||x>e){o.push([s,e]);continue}if(s<x)o.push([s,x-1]);if(x<e)o.push([x+1,e])}this.iv=o}
+  intervals(){return this.iv.map(a=>a.slice())}
+}
+function applyOp(ix,orc,op){
+  if(op.t==='ins'){orc&&orc.insert(op.x);return ix.insert(op.x)}
+  if(op.t==='rng'){orc&&orc.insertRange(op.L,op.R);return ix.insertRange(op.L,op.R)}
+  if(op.t==='del'){orc&&orc.delete(op.x);return ix.delete(op.x)}
+  if(op.t==='mode'){ix.setBalanced(op.b);return{op:'mode',kind:'MODE',b:op.b,rot:[],path:[],visited:0}}
+}
+const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+function mkRng(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>>17;s^=s<<5;s>>>=0;return s/4294967296}}
+function runTests(){
+  const T=[];const now=()=>(typeof performance!=='undefined'?performance:Date).now();const t=(name,fn)=>{const t0=now();try{const r=fn();T.push({name,ok:r===true,detail:r===true?'':String(r),ms:now()-t0})}catch(e){T.push({name,ok:false,detail:e.message,ms:now()-t0})}};
+  const build=(xs,bal=true)=>{const ix=new IntervalIndex(bal);for(const x of xs)ix.insert(x);return ix};
+  t('Problem example: 1,3,7,2,6',()=>{const ix=build([1,3,7,2,6]);const q=ix.query(1,7);
+    return same(ix.intervals(),[[1,3],[6,7]])&&same(q.gaps,[[4,5]])||'got '+JSON.stringify(ix.intervals())});
+  t('Bridge merge: 1, 3, then 2',()=>{const ix=build([1,3]);const r=ix.insert(2);return r.kind==='BRIDGE'&&same(ix.intervals(),[[1,3]])||r.kind});
+  t('Bridge merge: [1,3] [5,8] plus 4',()=>{const ix=build([1,2,3,5,6,7,8]);const r=ix.insert(4);return r.kind==='BRIDGE'&&same(ix.intervals(),[[1,8]])&&ix.count===1||r.kind});
+  t('Duplicate at endpoint: 5, 5',()=>{const ix=build([5]);const h=JSON.stringify(ix.root);const r=ix.insert(5);return r.kind==='DUPLICATE'&&JSON.stringify(ix.root)===h||'changed'});
+  t('Duplicate inside an interval: [1,10] then 5',()=>{const ix=new IntervalIndex();ix.insertRange(1,10);const r=ix.insert(5);return r.kind==='DUPLICATE'&&same(ix.intervals(),[[1,10]])||r.kind});
+  t('Extend left / right: 5 then 4; 5 then 6',()=>{const a=build([5]);const r1=a.insert(4);const b=build([5]);const r2=b.insert(6);
+    return r1.kind==='EXTEND_LEFT'&&same(a.intervals(),[[4,5]])&&r2.kind==='EXTEND_RIGHT'&&same(b.intervals(),[[5,6]])||r1.kind+'/'+r2.kind});
+  t('Sparse IDs: 0, 10^9, 500000000',()=>{const ix=build([0,MAXID,500000000]);const q=ix.query(0,MAXID);
+    return ix.count===3&&same(q.gaps,[[1,499999999],[500000001,999999999]])||JSON.stringify(q.gaps)});
+  t('Boundaries: 0 and 10^9, clipped queries',()=>{const ix=build([0,1,MAXID-1,MAXID]);const a=ix.query(0,0),b=ix.query(1,5),c=ix.query(MAXID,MAXID);
+    return same(a.intervals,[[0,0]])&&same(b.intervals,[[1,1]])&&same(b.gaps,[[2,5]])&&same(c.intervals,[[MAXID,MAXID]])||'clip wrong'});
+  t('Window cutting through a range',()=>{const ix=build([1,2,3,6,7]);const q=ix.query(2,6);return same(q.intervals,[[2,3],[6,6]])&&same(q.gaps,[[4,5]])||JSON.stringify(q)});
+  t('Sorted worst case (2000 IDs): AVL height ≤ 1.44 log2 n',()=>{const xs=[];for(let i=1;i<=2000;i++)xs.push(2*i);const ix=build(xs);const bound=1.44*Math.log2(2002);
+    return ix.height()<=bound&&ix.check().length===0||'height '+ix.height()});
+  t('Sorted worst case: Unbalanced height is 2000',()=>{const xs=[];for(let i=1;i<=2000;i++)xs.push(2*i);const ix=build(xs,false);return ix.height()===2000||'height '+ix.height()});
+  for(const [type,xs] of [['LL',[30,20,10]],['RR',[10,20,30]],['LR',[30,10,20]],['RL',[10,30,20]]])
+    t('Rotation '+type,()=>{const ix=new IntervalIndex();let rs=[];for(const x of xs)rs=rs.concat(ix.insert(x).rot);
+      return rs.length===1&&rs[0].type===type&&ix.check().length===0&&ix.height()===2||JSON.stringify(rs)});
+  t('insertRange absorbs several intervals',()=>{const ix=build([1,5,9,20,40]);const r=ix.insertRange(4,21);return same(ix.intervals(),[[1,1],[4,21],[40,40]])&&r.absorbed.length===3||JSON.stringify(ix.intervals())});
+  t('insertRange joins touching neighbours',()=>{const ix=build([1,2,9]);ix.insertRange(3,8);return same(ix.intervals(),[[1,9]])||JSON.stringify(ix.intervals())});
+  t('Delete split: [1,10] minus 5',()=>{const ix=new IntervalIndex();ix.insertRange(1,10);const r=ix.delete(5);return r.kind==='SPLIT'&&same(ix.intervals(),[[1,4],[6,10]])||r.kind});
+  t('Delete edge cases',()=>{const ix=new IntervalIndex();ix.insertRange(1,10);ix.insert(20);
+    const a=ix.delete(1),b=ix.delete(10),c=ix.delete(20),d=ix.delete(50);
+    return a.kind==='SHRINK'&&b.kind==='SHRINK'&&c.kind==='REMOVED'&&d.kind==='NOT_PRESENT'&&same(ix.intervals(),[[2,9]])||[a.kind,b.kind,c.kind,d.kind].join(',')});
+  t('Query edge cases',()=>{const ix=build([5,6,7]);let err=false;try{ix.query(9,3)}catch(e){err=true}
+    const out=ix.query(100,200),full=ix.query(5,7);return err&&same(out.gaps,[[100,200]])&&full.gaps.length===0||'bad'});
+  t('Random fuzz: 10,000 mixed ops vs brute force',()=>{const rnd=mkRng(12345);const ix=new IntervalIndex(),o=new Oracle();
+    for(let i=0;i<10000;i++){const p=rnd();let op;
+      if(p<0.6)op={t:'ins',x:Math.floor(rnd()*400)};else if(p<0.75){const a=Math.floor(rnd()*400);op={t:'rng',L:a,R:a+Math.floor(rnd()*12)}}
+      else if(p<0.98)op={t:'del',x:Math.floor(rnd()*400)};else op={t:'mode',b:rnd()<0.5};
+      applyOp(ix,o,op);if(i%250===0||i===9999){if(!same(ix.intervals(),o.intervals()))return'mismatch at op '+i;const e=ix.check();if(e.length)return e[0]+' at op '+i}}
+    return true});
+  return T;
+}
+function fuzzMismatches(n,seed){const rnd=mkRng(seed||99);const ix=new IntervalIndex(),o=new Oracle();let bad=0,inv=0;
+  for(let i=0;i<n;i++){const p=rnd();let op;if(p<0.6)op={t:'ins',x:Math.floor(rnd()*400)};else if(p<0.75){const a=Math.floor(rnd()*400);op={t:'rng',L:a,R:a+Math.floor(rnd()*12)}}else if(p<0.98)op={t:'del',x:Math.floor(rnd()*400)};else op={t:'mode',b:rnd()<0.5};
+    applyOp(ix,o,op);if(!same(ix.intervals(),o.intervals()))bad++;if(i%500===0&&ix.check().length)inv++}return{ops:n,mismatches:bad,invariantFailures:inv}}
+
+
+/* Mini3D: a small perspective 3D renderer on Canvas 2D.
+   Immediate mode: every frame the owner's build(S) pushes boxes, lines, curves and labels.
+   Supports orbit (drag), pan (right-drag or shift-drag or two fingers), zoom (wheel or pinch),
+   hover and click picking of boxes, soft floor shadows and glow. */
+function Mini3D(canvas,opt){
+  opt=opt||{};
+  const ctx=canvas.getContext('2d');
+  const S={fog:opt.fog||null,canvas,ctx,build:opt.build||function(){},onPick:opt.onPick||null,onHover:opt.onHover||null,
+    theta:opt.theta??0.5,phi:opt.phi??1.15,dist:30,fov:40*Math.PI/180,tgt:[0,0,0],
+    goal:{tgt:[0,0,0],dist:30},userMoved:false,visible:true,hoverId:null,W:1,H:1,dpr:1,time:0,_floorY:null};
+  const H0={theta:S.theta,phi:S.phi};
+  let polys=[],labels=[],picks=[],cam=null,F=1;
+  const light=norm([0.45,0.85,0.55]);
+  function norm(v){const l=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/l,v[1]/l,v[2]/l]}
+  function sub(a,b){return[a[0]-b[0],a[1]-b[1],a[2]-b[2]]}
+  function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]}
+  function cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
+  function setCam(){const t=S.tgt,d=S.dist;const eye=[t[0]+d*Math.sin(S.phi)*Math.sin(S.theta),t[1]+d*Math.cos(S.phi),t[2]+d*Math.sin(S.phi)*Math.cos(S.theta)];
+    const f=norm(sub(t,eye));const r=norm(cross(f,[0,1,0]));const u=cross(r,f);cam={eye,f,r,u};F=(S.H/2)/Math.tan(S.fov/2)}
+  function proj(p){const d=sub(p,cam.eye);const z=dot(d,cam.f);if(z<0.3)return null;return[S.W/2+dot(d,cam.r)*F/z,S.H/2-dot(d,cam.u)*F/z,z]}
+  S.project=p=>{setCam();return proj(p)};
+  function hex(c){if(c[0]!=='#')return[128,128,128];if(c.length===4)c='#'+c[1]+c[1]+c[2]+c[2]+c[3]+c[3];const n=parseInt(c.slice(1,7),16);return[n>>16&255,n>>8&255,n&255]}
+  function fogK(z){const f=S.fog;if(!f)return 0;return Math.max(0,Math.min(1,(z-f.near)/(f.far-f.near)))*(f.max??0.85)}
+  function shadeF(rgb,k,a,z){const f=fogK(z);if(!f)return shade(rgb,k,a);const c=S.fog.rgb;const m=x=>x;return'rgba('+Math.round(Math.min(255,rgb[0]*k)*(1-f)+c[0]*f)+','+Math.round(Math.min(255,rgb[1]*k)*(1-f)+c[1]*f)+','+Math.round(Math.min(255,rgb[2]*k)*(1-f)+c[2]*f)+','+(a??1)+')'}
+  function shade(rgb,k,a){return'rgba('+Math.round(Math.min(255,rgb[0]*k))+','+Math.round(Math.min(255,rgb[1]*k))+','+Math.round(Math.min(255,rgb[2]*k))+','+(a??1)+')'}
+  const FACES=[[[0,1,3,2],[-1,0,0]],[[4,6,7,5],[1,0,0]],[[0,4,5,1],[0,-1,0]],[[2,3,7,6],[0,1,0]],[[0,2,6,4],[0,0,-1]],[[1,5,7,3],[0,0,1]]];
+  /* box: centre x,y,z, size w,h,d, colour, id (pickable), glow colour, alpha, shadow */
+  S.box=function(b){const hw=b.w/2,hh=b.h/2,hd=b.d/2;const C=[];
+    for(let i=0;i<8;i++)C.push([b.x+(i&4?hw:-hw),b.y+(i&2?hh:-hh),b.z+(i&1?hd:-hd)]);
+    const P=C.map(proj);if(P.some(p=>!p))return;const rgb=hex(b.color||'#888888');let minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9,zs=0;
+    for(const p of P){minx=Math.min(minx,p[0]);maxx=Math.max(maxx,p[0]);miny=Math.min(miny,p[1]);maxy=Math.max(maxy,p[1]);zs+=p[2]}
+    const zc=zs/8;
+    if(b.shadow!==false&&S._floorY!==null){const fy=S._floorY+0.01,s=1+(b.y-S._floorY)*0.04;const q=[[b.x-hw*s,fy,b.z-hd*s],[b.x+hw*s,fy,b.z-hd*s],[b.x+hw*s,fy,b.z+hd*s],[b.x-hw*s,fy,b.z+hd*s]].map(proj);
+      if(q.every(Boolean))polys.push({pts:q,z:1e6-zc,fill:'rgba(0,0,0,'+(0.16/s)+')',shadow:true})}
+    for(const [idx,n] of FACES){const ctr=[0,0,0];for(const i of idx){ctr[0]+=C[i][0]/4;ctr[1]+=C[i][1]/4;ctr[2]+=C[i][2]/4}
+      if(dot(n,sub(cam.eye,ctr))<=0)continue;const k=0.62+0.5*Math.max(0,dot(n,light));const pts=idx.map(i=>P[i]);const zf=pts.reduce((a,p)=>a+p[2],0)/4;
+      polys.push({pts,z:zf,fill:shadeF(rgb,k,b.alpha,zf),stroke:b.edge||shadeF(rgb,0.72,b.alpha,zf),glow:b.glow,id:b.id,fa:1-fogK(zf)})}
+    if(b.id!=null)picks.push({id:b.id,x0:minx,x1:maxx,y0:miny,y1:maxy,z:zc,pts:P});
+    if(b.label)labels.push({p:[b.x,b.y,b.z+hd+0.02],text:b.label,sub:b.sub,size:b.labelSize||0.55,color:b.labelColor||'#ffffff',z:zc,maxW:(maxx-minx)*0.92})};
+  S.pickBox=function(id,b){};
+  S.line=function(pts,o){o=o||{};const P=pts.map(proj);for(let i=1;i<P.length;i++){if(!P[i-1]||!P[i])continue;
+    const zz=(P[i-1][2]+P[i][2])/2;polys.push({seg:[P[i-1],P[i]],z:zz+(o.zBias||0),color:o.color||'#888',width:o.width||1.5,dash:o.dash,dashOff:o.dashOff||0,alpha:(o.alpha??1)*(1-fogK(zz))})}};
+  S.ring=function(c,r,o){const pts=[];for(let i=0;i<=40;i++){const a=i/40*Math.PI*2;pts.push([c[0]+Math.cos(a)*r,c[1],c[2]+Math.sin(a)*r])}S.line(pts,o)};
+  S.glowDot=function(p,r,color,alpha){const q=proj(p);if(!q)return;polys.push({halo:true,x:q[0],y:q[1],r:r*F/q[2],rgb:hex(color),alpha:(alpha??0.5)*(1-fogK(q[2])),z:q[2]+(r*0.5)})};
+  S.dot=function(p,r,color,alpha){const q=proj(p);if(!q)return;const rr=Math.max(0.6,r*F/q[2]);polys.push({dot:true,x:q[0],y:q[1],r:rr,rgb:hex(color),alpha:(alpha??1)*(1-fogK(q[2])),z:q[2]})};
+  S.curve=function(a,c,b,o){const pts=[];for(let i=0;i<=24;i++){const t=i/24,u=1-t;pts.push([u*u*a[0]+2*u*t*c[0]+t*t*b[0],u*u*a[1]+2*u*t*c[1]+t*t*b[1],u*u*a[2]+2*u*t*c[2]+t*t*b[2]])}S.line(pts,o)};
+  S.label=function(p,text,o){o=o||{};labels.push({p,text,sub:o.sub,size:o.size||0.5,color:o.color||'#888',z:-1,align:o.align,pill:o.pill,flat:o.flat,mono:o.mono})};
+  S.floor=function(y,extent,color,n,alpha){S._floorY=y;n=n||10;alpha=alpha??0.5;const [x0,x1,z0,z1]=extent;
+    for(let i=0;i<=n;i++){const x=x0+(x1-x0)*i/n,z=z0+(z1-z0)*i/n;S.line([[x,y,z0],[x,y,z1]],{color,width:1,zBias:1e6,alpha});S.line([[x0,y,z],[x1,y,z]],{color,width:1,zBias:1e6,alpha})}};
+  S.fit=function(bx){/* bx: [minX,maxX,minY,maxY,minZ,maxZ] */S._lastFit=bx;
+    const cx=(bx[0]+bx[1])/2,cy=(bx[2]+bx[3])/2,cz=(bx[4]+bx[5])/2;const w=bx[1]-bx[0],h=bx[3]-bx[2],d=bx[5]-bx[4];const asp=S.W/Math.max(1,S.H);
+    const th=S.theta,ph=S.phi;const fw=norm([-Math.sin(ph)*Math.sin(th),-Math.cos(ph),-Math.sin(ph)*Math.cos(th)]);const rr=norm(cross(fw,[0,1,0]));const uu=cross(rr,fw);
+    const tH=Math.tan(S.fov/2)*0.9,tW=tH*asp;let need=0;
+    for(let i=0;i<8;i++){const v=[(i&1?bx[1]:bx[0])-cx,(i&2?bx[3]:bx[2])-cy,(i&4?bx[5]:bx[4])-cz];const x=dot(v,rr),y=dot(v,uu),z=dot(v,fw);need=Math.max(need,Math.abs(x)/tW-z,Math.abs(y)/tH-z)}
+    S.goal={tgt:[cx,cy,cz],dist:Math.max(opt.minDist||8,need+1)};S._fitDist=S.goal.dist;
+    if(!S.userMoved&&S._snap){S.tgt=S.goal.tgt.slice();S.dist=S.goal.dist;S._snap=false}};
+  S.resetView=function(){S.userMoved=false;S.theta=H0.theta;S.phi=H0.phi};
+  S.snap=function(){S._snap=true};
+  function resize(){const r=canvas.getBoundingClientRect();S.dpr=Math.min(window.devicePixelRatio||1,2);S.W=Math.max(1,r.width);S.H=Math.max(1,r.height);
+    canvas.width=Math.round(S.W*S.dpr);canvas.height=Math.round(S.H*S.dpr)}
+  S.resize=resize;
+  function frame(now){requestAnimationFrame(frame);if(!S.visible||!canvas.isConnected||canvas.offsetParent===null)return;S.time=now/1000;
+    {const r=canvas.getBoundingClientRect();if(Math.abs(r.width-S.W)>0.5||Math.abs(r.height-S.H)>0.5){resize();if(S._lastFit){if(!S.userMoved)S._snap=true;S.fit(S._lastFit)}}}
+    if(!S.userMoved){for(let i=0;i<3;i++)S.tgt[i]+=(S.goal.tgt[i]-S.tgt[i])*0.1;S.dist+=(S.goal.dist-S.dist)*0.1}
+    setCam();polys=[];labels=[];picks=[];S._floorY=null;
+    S.build(S,now);
+    ctx.setTransform(S.dpr,0,0,S.dpr,0,0);ctx.clearRect(0,0,S.W,S.H);
+    polys.sort((a,b)=>b.z-a.z);
+    for(const p of polys){
+      if(p.halo){if(p.r<1)continue;const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);const c=p.rgb.join(',');g.addColorStop(0,'rgba('+c+','+p.alpha+')');g.addColorStop(1,'rgba('+c+',0)');ctx.globalCompositeOperation='lighter';ctx.fillStyle=g;ctx.fillRect(p.x-p.r,p.y-p.r,p.r*2,p.r*2);ctx.globalCompositeOperation='source-over';continue}
+      if(p.dot){ctx.fillStyle='rgba('+p.rgb.join(',')+','+p.alpha+')';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.2832);ctx.fill();continue}
+      if(p.seg){ctx.globalAlpha=p.alpha;ctx.strokeStyle=p.color;ctx.lineWidth=p.width;ctx.setLineDash(p.dash||[]);ctx.lineDashOffset=p.dashOff;
+        ctx.beginPath();ctx.moveTo(p.seg[0][0],p.seg[0][1]);ctx.lineTo(p.seg[1][0],p.seg[1][1]);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;continue}
+      ctx.beginPath();ctx.moveTo(p.pts[0][0],p.pts[0][1]);for(let i=1;i<p.pts.length;i++)ctx.lineTo(p.pts[i][0],p.pts[i][1]);ctx.closePath();
+      if(p.glow){ctx.shadowColor=p.glow;ctx.shadowBlur=22}ctx.fillStyle=p.fill;ctx.fill();ctx.shadowBlur=0;
+      if(p.stroke){ctx.strokeStyle=p.glow||p.stroke;ctx.lineWidth=p.glow?2.5:1;ctx.lineJoin='round';ctx.stroke()}}
+    for(const L of labels){const q=proj(L.p);if(!q)continue;ctx.globalAlpha=1-fogK(q[2])*0.9;let px=L.size*F/q[2];if(L.pill)px=Math.max(px,11);if(px<8){if(L.maxW&&L.maxW>=16)px=8.5;else continue}px=Math.min(px,26);
+      const FF=L.mono?"500 PXpx 'JetBrains Mono', monospace":"700 PXpx Orbitron, Inter, system-ui, sans-serif";ctx.font=FF.replace('PX',px.toFixed(1));let w=ctx.measureText(L.text).width;
+      if(L.maxW&&w>L.maxW){px=px*L.maxW/w;if(px<7)continue;ctx.font=FF.replace('PX',px.toFixed(1));w=ctx.measureText(L.text).width}
+      ctx.textAlign=L.align||'center';ctx.textBaseline='middle';
+      if(L.pill){ctx.fillStyle=L.pill;const pw=w+px*0.9,ph=px*1.5,x0=L.align==='left'?q[0]-px*0.45:q[0]-pw/2;ctx.beginPath();ctx.roundRect?ctx.roundRect(x0,q[1]-ph/2,pw,ph,ph/2):ctx.rect(x0,q[1]-ph/2,pw,ph);ctx.fill()}
+      ctx.fillStyle=L.color;ctx.fillText(L.text,q[0],L.sub?q[1]-px*0.35:q[1]);
+      if(L.sub){ctx.font="500 "+(px*0.62).toFixed(1)+"px 'JetBrains Mono', monospace";ctx.fillStyle='rgba(255,235,170,1)';ctx.fillText(L.sub,q[0],q[1]+px*0.5)}}ctx.globalAlpha=1}
+  requestAnimationFrame(frame);
+  function inPoly(x,y,pts){let c=false;for(let i=0,j=pts.length-1;i<pts.length;j=i++){const a=pts[i],b=pts[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])c=!c}return c}
+  function hull(P){const p=P.map(q=>[q[0],q[1]]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);const lo=[],up=[];
+    for(const q of p){while(lo.length>1&&cr(lo[lo.length-2],lo[lo.length-1],q)<=0)lo.pop();lo.push(q)}for(const q of p.reverse()){while(up.length>1&&cr(up[up.length-2],up[up.length-1],q)<=0)up.pop();up.push(q)}return lo.slice(0,-1).concat(up.slice(0,-1))}
+  S.pickAt=function(x,y){let best=null;for(const k of picks){if(x<k.x0||x>k.x1||y<k.y0||y>k.y1)continue;if(!inPoly(x,y,hull(k.pts)))continue;if(!best||k.z<best.z)best=k}return best?best.id:null};
+  const ptrs=new Map();let down=null,pinch=0;
+  canvas.style.touchAction='none';
+  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);down={x:e.clientX,y:e.clientY,moved:0,pan:e.button===2||e.shiftKey};
+    if(ptrs.size===2){const v=[...ptrs.values()];pinch=Math.hypot(v[0][0]-v[1][0],v[0][1]-v[1][1])}});
+  canvas.addEventListener('pointermove',e=>{const r=canvas.getBoundingClientRect();
+    if(!down){const id=S.pickAt(e.clientX-r.left,e.clientY-r.top);if(id!==S.hoverId){S.hoverId=id;canvas.style.cursor=id!=null&&S.onPick?'pointer':'grab';S.onHover&&S.onHover(id)}return}
+    const prev=ptrs.get(e.pointerId);if(!prev)return;const dx=e.clientX-prev[0],dy=e.clientY-prev[1];ptrs.set(e.pointerId,[e.clientX,e.clientY]);down.moved+=Math.abs(dx)+Math.abs(dy);
+    if(down.moved<4)return;S.userMoved=true;canvas.style.cursor='grabbing';
+    if(ptrs.size===2){const v=[...ptrs.values()];const d=Math.hypot(v[0][0]-v[1][0],v[0][1]-v[1][1]);if(pinch){S.dist=Math.max(3,Math.min(5000,S.dist*pinch/d))}pinch=d;panBy(dx/2,dy/2);return}
+    if(down.pan)panBy(dx,dy);else{S.theta-=dx*0.007;S.phi=Math.min(1.62,Math.max(0.25,S.phi-dy*0.007))}});
+  function panBy(dx,dy){setCam();const s=S.dist/S.H*1.0;for(let i=0;i<3;i++)S.tgt[i]+=-dx*s*cam.r[i]+dy*s*cam.u[i]}
+  const up=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=0;if(down&&down.moved<4&&ptrs.size===0&&S.onPick){const r=canvas.getBoundingClientRect();S.onPick(S.pickAt(e.clientX-r.left,e.clientY-r.top))}
+    if(ptrs.size===0){down=null;canvas.style.cursor='grab'}};
+  canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+  canvas.addEventListener('wheel',e=>{e.preventDefault();S.userMoved=true;S.dist=Math.max(3,Math.min(5000,S.dist*Math.exp(e.deltaY*0.0012)))},{passive:false});
+  canvas.addEventListener('dblclick',()=>S.resetView());
+  if('IntersectionObserver' in window)new IntersectionObserver(es=>{for(const e of es)S.visible=e.isIntersecting}).observe(canvas);
+  resize();return S;
+}
+
+{
+/* ---------- shared helpers and state ---------- */
+const $=id=>document.getElementById(id);
+const COL={NEW:'#3b82f6',EXTEND_RIGHT:'#22c55e',EXTEND_LEFT:'#22c55e',BRIDGE:'#f97316',DUPLICATE:'#64748b',RANGE:'#8b5cf6',SPLIT:'#8b5cf6',SHRINK:'#8b5cf6',REMOVED:'#8b5cf6',NOT_PRESENT:'#64748b',MODE:'#64748b'};
+const NAME={NEW:'New range',EXTEND_RIGHT:'Extend right',EXTEND_LEFT:'Extend left',BRIDGE:'Bridge merge',DUPLICATE:'Duplicate',RANGE:'Range insert',SPLIT:'Split',SHRINK:'Shrink',REMOVED:'Removed',NOT_PRESENT:'Not present',MODE:'Mode change'};
+const iv=a=>a?'['+a[0]+','+a[1]+']':'none';
+const fmt=n=>n<1e4?String(n):n<1e6?(+(n/1e3).toFixed(n%1e3?1:0))+'k':n<1e9?(+(n/1e6).toFixed(n%1e6?1:0))+'M':(+(n/1e9).toFixed(n%1e9?2:0))+'B';
+const fIv=(s,e)=>s===e?fmt(s):fmt(s)+'–'+fmt(e);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function isDark(){const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches}
+function pal(){return{ink:'#e6f1ff',muted:'#7f93ad',grid:'#1f7f95',node:'#14365a',nodeEdge:'rgba(34,211,238,.6)',slab:'#0c1a2c',edge:'#2f7f9e'}}
+function chk(v){if(!Number.isInteger(v)||v<0||v>MAXID)throw new Error('IDs must be whole numbers from 0 to 1,000,000,000');return v}
+function parseId(s){s=String(s).trim();if(!/^\d+$/.test(s))throw new Error('"'+s.slice(0,20)+'" is not a whole number of 0 or more');return chk(Number(s))}
+function parseList(txt){const toks=txt.split(/[\s,]+/).filter(Boolean);if(!toks.length)throw new Error('Type one or more IDs, like 1, 3, 7');return toks.map(parseId)}
+function parseRanges(txt){const out=[];for(const tok of txt.split(/[\s,]+/).filter(Boolean)){const m=/^(\d+)(?:-(\d+))?$/.exec(tok);if(!m)throw new Error('"'+tok.slice(0,20)+'" should look like 20 or 12-14');
+  const a=chk(+m[1]),b=m[2]!==undefined?chk(+m[2]):a;if(a>b)throw new Error(tok+' runs backwards');out.push([a,b])}return out}
+
+let ix=new IntervalIndex(),orc=new Oracle(),ops=[],cur=0,queue=[],playing=true,stepOnce=false,busy=false,gen=0;
+let colorOf=new Map(),visHist=[],heightHist=[],logLines=[],query=null,scale='linear',debug=false,bugged=false,opRes=[],opTimes=[];
+const caseCount={};let rotTotal=0;
+const hooks=[];function onChange(f){hooks.push(f)}function changed(){for(const f of hooks){try{f()}catch(e){console.error(e)}}}
+
+/* ---------- reusable 3D tree + track view ---------- */
+function TreeView(canvas,o){
+  const V={nodes:new Map(),edges:[],dying:[],glow:new Map(),tags:new Map(),rings:[],pkg:null,sweep:null,focus:null,sel:null,hover:null,track:null,trackFrom:null,W:12,minY:0,trackY:-4,capped:false,height:0,count:0};
+  const SPX=3.9,SPY=2.7,TZ=2.6;const trk=()=>typeof o.track==='function'?o.track():!!o.track;const halo=()=>typeof o.halo==='function'?o.halo():!!o.halo;
+  const PT=[];for(let i=0;i<(o.particles||0);i++)PT.push([Math.random()*2-1,Math.random()*14-6,Math.random()*30-22,Math.random()*6.28]);
+  const S=Mini3D(canvas,{theta:o.theta??0.42,phi:o.phi??1.2,minDist:o.minDist||12,fog:o.fog||null,build,onPick:id=>{V.sel=id==null?null:(typeof id==='string'?+id.slice(1):id);o.onSelect&&o.onSelect(info(V.sel))},
+    onHover:id=>{V.hover=id==null?null:(typeof id==='string'?+id.slice(1):id);o.onHover&&o.onHover(V.hover)}});
+  const baseTheta=o.theta??0.42;
+  function cur(q,now){const k=ease(Math.min(1,Math.max(0,(now-q.t0)/q.dur)));return[q.from[0]+(q.to[0]-q.from[0])*k,q.from[1]+(q.to[1]-q.from[1])*k,q.from[2]+(q.to[2]-q.from[2])*k]}
+  function snapshot(){const I=o.getIx();const total=I.count;const cap=total>(o.cap||300)?(o.capDepth||7):Infinity;const out=[];let i=0;
+    (function w(n,d,p){if(!n||d>cap)return;w(n.l,d+1,n.id);out.push({id:n.id,s:n.s,e:n.e,h:n.h,bf:(n.l?n.l.h:0)-(n.r?n.r.h:0),d,p,i:i++,l:n.l?[n.l.s,n.l.e]:null,r:n.r?[n.r.s,n.r.e]:null});w(n.r,d+1,n.id)})(I.root,1,null);
+    return{list:out,capped:total>(o.cap||300),height:I.height(),count:total}}
+  function buildTrack(W){const I=o.getIx();const q=o.getQuery?o.getQuery():null;const sc=o.getScale?o.getScale():'linear';let A,B,blocks,gaps;
+    if(q){const r=I.query(q[0],q[1]);A=q[0];B=q[1];blocks=r.intervals;gaps=r.gaps}
+    else{blocks=I.intervals();if(!blocks.length)return{empty:true,W};A=blocks[0][0];B=blocks[blocks.length-1][1];gaps=[];for(let i=1;i<blocks.length;i++)gaps.push([blocks[i-1][1]+1,blocks[i][0]-1])}
+    let segs=[...blocks.map(b=>({s:b[0],e:b[1],g:0})),...gaps.map(b=>({s:b[0],e:b[1],g:1}))].sort((a,b)=>a.s-b.s);const more=segs.length>600;if(more)segs=segs.slice(0,600);
+    const x0=-W/2,span=W;
+    if(sc==='linear'){const tot=B-A+1;for(const s of segs){s.x0=x0+(s.s-A)/tot*span;s.x1=x0+(s.e-A+1)/tot*span}}
+    else{const wt=s=>s.g&&s.e-s.s+1>3?2.2:1+Math.log10(s.e-s.s+1);const tot=segs.reduce((a,s)=>a+wt(s),0);let x=x0;for(const s of segs){const w=wt(s)/tot*span;s.x0=x;s.x1=x+w;x+=w}}
+    for(const s of segs)if(!s.g){const n=I.floor(s.s);s.id=n?n.id:null}
+    return{segs,A,B,W,q:!!q,sc,more}}
+  function trackX(v){const T=V.track;if(!T||T.empty)return 0;const sg=T.segs;if(v<=sg[0].s)return sg[0].x0;const last=sg[sg.length-1];if(v>=last.e)return last.x1;
+    for(const s of sg)if(v>=s.s&&v<=s.e)return s.x0+(v-s.s+0.5)/(s.e-s.s+1)*(s.x1-s.x0);return 0}
+  function sync(animate,dur,spawn){const now=performance.now();dur=reduced?1:dur;const snap=snapshot();const cnt=snap.list.length;const ids=new Set();let maxD=1;
+    for(const q of snap.list){q.x=(q.i-(cnt-1)/2)*SPX;q.y=-(q.d-1)*SPY;ids.add(q.id);maxD=Math.max(maxD,q.d);
+      const old=V.nodes.get(q.id);const sp=spawn&&spawn.get(q.id);const cp=old?cur(old,now):sp?sp.slice():[q.x,q.y+(animate?8:0),0];q.from=animate?cp:[q.x,q.y,0];q.to=[q.x,q.y,0];q.t0=now;q.dur=animate?dur:1;V.nodes.set(q.id,q)}
+    for(const [id,old] of V.nodes)if(!ids.has(id)){if(animate)V.dying.push(Object.assign({},old,{from:cur(old,now),to:cur(old,now),t0:now,dur}));V.nodes.delete(id)}
+    V.edges=snap.list.filter(q=>q.p!=null&&ids.has(q.p)).map(q=>[q.p,q.id]);V.capped=snap.capped;V.height=snap.height;V.count=snap.count;
+    const oldT=V.track;V.W=Math.max(cnt*SPX,trk()?18:10);V.minY=-(maxD-1)*SPY;V.trackY=V.minY-3.6;V.track=trk()?buildTrack(V.W):null;
+    if(animate&&oldT&&!oldT.empty&&V.track&&!V.track.empty){const m=new Map();for(const s of oldT.segs)m.set(s.s+':'+s.g,[s.x0,s.x1]);V.trackFrom={m,t0:now,dur}}else V.trackFrom=null;
+    S.fit([-V.W/2-1,V.W/2+1,trk()?V.trackY-1.2:V.minY-1,1.6,-1,trk()?TZ+1:1]);
+    if(V.sel!=null&&!V.nodes.has(V.sel)){V.sel=null;o.onSelect&&o.onSelect(null)}
+    if(o.onSync)o.onSync(V)}
+  function build(S,now){const P=pal();const t=S.time;const tr=!!V.track;
+    if(o.drift&&!reduced&&!S.userMoved)S.theta=baseTheta+Math.sin(t*0.12)*0.22;
+    const fy=(tr?V.trackY:V.minY)-1.0;S.floor(fy,[-V.W/2-3,V.W/2+3,-3,tr?TZ+3:3],P.grid,14,0.35);
+    for(const p of PT){const x=p[0]*(V.W/2+10)+(reduced?0:Math.sin(t*0.2+p[3])*0.8),y=p[1]+(reduced?0:Math.sin(t*0.3+p[3]*2)*0.6);S.dot([x,y,p[2]],0.05,'#7dd3fc',0.55)}
+    V.dying=V.dying.filter(q=>now-q.t0<q.dur);V.rings=V.rings.filter(r=>now-r.t0<900);
+    const pos=new Map();for(const [id,q] of V.nodes)pos.set(id,cur(q,now));
+    if(V.focus&&!S.userMoved){if(now<V.focus.until&&pos.get(V.focus.id)){const p=pos.get(V.focus.id);S.goal={tgt:[p[0],p[1]-0.5,p[2]],dist:Math.max(10,(S._fitDist||20)*0.62)}}else{V.focus=null;if(S._lastFit)S.fit(S._lastFit)}}
+    for(const [a,b] of V.edges){const p=pos.get(a),c=pos.get(b);if(p&&c)S.line([[p[0],p[1]-0.58,p[2]],[c[0],c[1]+0.58,c[2]]],{color:P.edge,width:2})}
+    const focus=V.hover!=null?V.hover:V.sel;const hl=halo();
+    for(const [id,q] of V.nodes){const p=pos.get(id);const gl=V.glow.get(id)||(id===V.sel?'#22d3ee':id===V.hover?'#67e8f9':null);
+      const cc=o.colorOf&&o.colorOf(id);if(hl)S.glowDot(p,2.6,cc||'#22d3ee',cc?0.45:0.22);
+      S.box({x:p[0],y:p[1],z:p[2],w:3.3,h:1.15,d:1.15,color:cc||P.node,edge:cc?null:P.nodeEdge,id,glow:gl,label:fIv(q.s,q.e),sub:o.debug&&o.debug()?'h'+q.h+' · bf '+q.bf:null});
+      const tg=V.tags.get(id);if(tg)S.label([p[0],p[1]+1.25,p[2]],tg.t,{size:0.5,pill:tg.c||'#ffb400',color:tg.tc||'#2a1c00'})}
+    for(const r of V.rings){const p=r.id!=null?pos.get(r.id):r.p;if(!p)continue;const k=(now-r.t0)/900;S.ring([p[0],p[1]-0.55,p[2]],1.9+k*3.2,{color:r.c,width:3,alpha:(1-k)*0.9,zBias:-2})}
+    for(const q of V.dying){const k=Math.min(1,(now-q.t0)/q.dur),s=Math.max(0.05,1-k);S.box({x:q.from[0],y:q.from[1],z:0,w:3.3*s,h:1.15*s,d:1.15*s,color:(o.colorOf&&o.colorOf(q.id))||P.node,alpha:1-k,shadow:false})}
+    if(V.pkg){const g=V.pkg;const el=now-g.t0;let idx=Math.min(g.path.length-1,Math.floor(el/g.step));let target;
+      if(g.path.length&&pos.get(g.path[Math.max(0,idx)])){const p=pos.get(g.path[Math.max(0,idx)]);target=[p[0],p[1]+1.55,p[2]]}else target=[0,2.2,0];
+      if(!g.p)g.p=[target[0],target[1]+5,target[2]];for(let i=0;i<3;i++)g.p[i]+=(target[i]-g.p[i])*0.18;
+      if(hl)S.glowDot(g.p,2,g.color||'#ffb400',0.6);S.box({x:g.p[0],y:g.p[1],z:g.p[2],w:1.5,h:0.9,d:0.9,color:g.color||'#ffb400',label:fmt(g.x),labelColor:'#2a1c00',shadow:true})}
+    if(V.track){const T=V.track,y=V.trackY;S.box({x:0,y,z:TZ,w:T.W+1.4,h:0.36,d:1.7,color:P.slab,edge:'rgba(34,211,238,.35)',shadow:false});
+      if(T.empty){S.label([0,y+0.9,TZ],'Nothing has arrived yet',{size:0.6,color:P.muted})}
+      else{let lastL=-1e9;const TF=V.trackFrom;const kk=TF?ease(Math.min(1,(now-TF.t0)/TF.dur)):1;if(TF&&kk>=1)V.trackFrom=null;
+        const X=s=>{const f=TF&&TF.m.get(s.s+':'+s.g);return f?[f[0]+(s.x0-f[0])*kk,f[1]+(s.x1-f[1])*kk]:[s.x0,s.x1]};
+        if(T.q)S.box({x:0,y:y+0.55,z:TZ,w:T.W+0.6,h:1.5,d:2.1,color:'#22d3ee',alpha:0.1,shadow:false});
+        for(const s of T.segs){let [x0,x1]=X(s);if(s.g){S.line([[x0,y+0.2,TZ],[x1,y+0.2,TZ]],{color:'#ef4444',width:3,dash:[5,4]});
+            if(T.sc==='compressed'&&s.e-s.s+1>3)S.label([(x0+x1)/2,y+0.55,TZ+0.9],'//',{size:0.55,color:'#ef4444'});continue}
+          if(x1-x0<0.35){const c=(x0+x1)/2;x0=c-0.175;x1=c+0.175}
+          const hb=s.id!=null&&s.id===focus;const bc=o.colorOf&&o.colorOf(s.id);S.box({x:(x0+x1)/2,y:y+0.5,z:TZ,w:x1-x0,h:0.55,d:1.1,color:bc||'#1e5a8a',edge:bc?null:P.nodeEdge,id:'b'+s.id,glow:hb?'#22d3ee':null,shadow:false});
+          if(x0-lastL>3){S.label([x0,y+1.3,TZ],fmt(s.s),{size:0.6,color:P.ink,align:'left'});lastL=x0}}
+        S.label([-T.W/2,y-0.75,TZ+0.9],(T.q?'window ':'')+T.A.toLocaleString(),{size:0.55,color:P.muted,align:'left'});
+        S.label([T.W/2,y-0.75,TZ+0.9],T.B.toLocaleString()+(T.more?' (first 600 pieces)':''),{size:0.55,color:P.muted,align:'right'});
+        if(V.sweep){const w=V.sweep;const k=Math.min(1,(now-w.t0)/w.dur);const xa=trackX(w.a),xb=trackX(w.b);const xe=xa+(xb-xa)*ease(k);
+          S.box({x:(xa+xe)/2,y:y+0.6,z:TZ,w:Math.max(0.2,xe-xa),h:1.0,d:1.6,color:w.c||'#8b5cf6',alpha:0.45,shadow:false});if(hl)S.glowDot([xe,y+0.8,TZ],1.6,w.c||'#8b5cf6',0.7);
+          if(k>=1&&now-w.t0>w.dur+600)V.sweep=null}}
+      if(focus!=null&&pos.get(focus)&&T.segs){const seg=T.segs.find(s=>!s.g&&s.id===focus);if(seg){const p=pos.get(focus);const bx=(seg.x0+seg.x1)/2;
+        S.curve([p[0],p[1]-0.6,p[2]+0.3],[(p[0]+bx)/2,(p[1]+y)/2,TZ+2.2],[bx,y+0.8,TZ],{color:'#22d3ee',width:3,dash:[8,7],dashOff:-t*40});
+        const k=(t*0.8)%1,u=1-k;const pp=[u*u*p[0]+2*u*k*(p[0]+bx)/2+k*k*bx,u*u*(p[1]-0.6)+2*u*k*(p[1]+y)/2+k*k*(y+0.8),u*u*(p[2]+0.3)+2*u*k*(TZ+2.2)+k*k*TZ];
+        S.glowDot(pp,0.9,'#22d3ee',0.9);S.dot(pp,0.12,'#e0faff',1)}}}}
+  function info(id){const q=V.nodes.get(id);if(!q)return null;return q}
+  function idAt(iv2){for(const [id,q] of V.nodes)if(q.s===iv2[0]&&q.e===iv2[1])return id;return null}
+  return{S,V,sync,glow:(id,c)=>V.glow.set(id,c||'#ffb400'),clearGlow:()=>V.glow.clear(),tag:(id,t,c,tc)=>{if(id!=null)V.tags.set(id,{t,c,tc})},clearTags:()=>V.tags.clear(),
+    ring:(id,c)=>{if(id!=null)V.rings.push({id,c:c||'#22d3ee',t0:performance.now()})},sweep:(a,b,dur,c)=>{V.sweep={a,b,dur:reduced?1:dur,c,t0:performance.now()}},
+    focus:(id,ms)=>{V.focus={id,until:performance.now()+ms}},idAt,posOf:id=>{const q=V.nodes.get(id);return q?cur(q,performance.now()):null},
+    pkg:(x,path,step,color)=>{V.pkg={x,path,step,color,t0:performance.now()}},clearPkg:()=>{V.pkg=null},resetView:()=>{S.resetView()},snap:()=>S.snap(),info}}
+
+/* ---------- shared animated operation (path, tags, ±2 flash, sweep, split, rings) ---------- */
+async function animOp(view,I,r,o){/* r: result already applied to I; view still shows the old tree */
+  const base=o.base,alive=o.alive||(()=>true),stepMs=base*0.32;
+  if(r.op==='insert'||r.op==='delete'){view.pkg(r.x,r.path,stepMs,r.op==='delete'?'#fca5a5':'#ffb400');for(const id of r.path){view.glow(id);await sleep(stepMs);if(!alive())return false}}
+  if(r.op==='insert'){view.tag(r.floorId,'floor('+r.x+')');if(r.higherId!==r.floorId)view.tag(r.higherId,'higher('+r.x+')')}
+  if(r.op==='range'){view.clearGlow();for(const a of r.absorbed){const id=view.idAt(a);if(id!=null)view.glow(id,'#8b5cf6')}view.sweep(r.L,r.R,base*1.2,'#8b5cf6');await sleep(base*1.3);if(!alive())return false}
+  if(r.op==='delete'&&r.floorId!=null){view.glow(r.floorId,'#ef4444');view.tag(r.floorId,r.kind==='SPLIT'?'split at '+r.x:r.kind==='NOT_PRESENT'?'not here':'remove '+r.x,'#ef4444','#fff')}
+  o.onCase&&o.onCase(r);await sleep(base*0.55);if(!alive())return false;
+  if(r.rot&&r.rot.length){view.clearTags();view.clearGlow();for(const ro of r.rot){const id=view.idAt(ro.at);if(id!=null){view.glow(id,'#ef4444');view.tag(id,'bf '+(ro.type[0]==='L'?'+2':'−2')+' → '+ro.type,'#ef4444','#fff')}}
+    o.onRotate&&o.onRotate(r);await sleep(base*0.9);if(!alive())return false}
+  view.clearPkg();view.clearTags();view.clearGlow();
+  let spawn=null;if(r.kind==='SPLIT'&&r.floorId!=null){const p=view.posOf(r.floorId);if(p){spawn=new Map([[r.id,p]])}}
+  view.sync(true,base,spawn);if(r.id!=null){view.glow(r.id,COL[r.kind]);view.ring(r.id,COL[r.kind]);if(o.focus)view.focus(r.id,base*2.2)}
+  Sfx.play(r.kind);
+  await sleep(base*1.1);if(!alive())return false;view.clearGlow();return true}
+
+/* ---------- optional sound (Web Audio, muted by default) ---------- */
+const Sfx={on:false,ctx:null,
+  toggle(){this.on=!this.on;if(this.on&&!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){this.on=false}}if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume();return this.on},
+  tone(f,t0,d,g){const c=this.ctx,o=c.createOscillator(),a=c.createGain();o.type='sine';o.frequency.value=f;a.gain.setValueAtTime(0,t0);a.gain.linearRampToValueAtTime(g,t0+0.02);a.gain.exponentialRampToValueAtTime(0.0001,t0+d);o.connect(a).connect(c.destination);o.start(t0);o.stop(t0+d+0.05)},
+  play(kind){if(!this.on||!this.ctx)return;try{const t=this.ctx.currentTime;const F={NEW:[523.25],EXTEND_LEFT:[587.33],EXTEND_RIGHT:[659.25],BRIDGE:[523.25,659.25,783.99],DUPLICATE:[220],RANGE:[392,493.88,587.33],SPLIT:[349.23,293.66],SHRINK:[349.23],REMOVED:[261.63],NOT_PRESENT:[196]}[kind]||[440];
+    F.forEach((f,i)=>this.tone(f,t+(kind==='BRIDGE'?0:i*0.06),kind==='BRIDGE'?1.4:0.6,0.08))}catch(e){}}};
+
+/* ---------- routing ---------- */
+const ROUTES=['story','index','tree','dashboard','compare','bridge','tests','data'];
+function route(){let h=(location.hash||'#index').slice(1);if(!ROUTES.includes(h))h='index';
+  for(const r of ROUTES){$('v-'+r).classList.toggle('on',r===h)}
+  document.querySelectorAll('.tabs a').forEach(a=>{if(a.getAttribute('href')==='#'+h)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  window.__route=h;document.body.classList.toggle('story-on',h==='story');changed();if(window.onRoute)window.onRoute(h)}
+addEventListener('hashchange',()=>{route();scrollTo(0,0)});
+
+/* ---------- badges ---------- */
+function updateBadges(){const errs=bugged?['Injected bug: '+bugged].concat(ix.check()):ix.check();const ok=same(ix.intervals(),orc.intervals());
+  $('invBadge').classList.toggle('bad',errs.length>0);$('invBadge').querySelector('span').textContent=errs.length?'Invariant broken':'Invariants OK';
+  $('orcBadge').classList.toggle('bad',!ok);$('orcBadge').querySelector('span').textContent=ok?'Brute force OK':'Brute force differs';
+  $('invText').textContent=(errs.length?errs.slice(0,5).join('; ')+'.':'Ranges are sorted, never overlap or touch, every cached height is right'+(ix.balanced?', and every node is AVL-balanced.':'.'))+' '+
+    (ok?'A simple sorted-list version, rebuilt by brute force after every operation, gives the same ranges.':'Brute force has '+JSON.stringify(orc.intervals().slice(0,6))+' but the tree has '+JSON.stringify(ix.intervals().slice(0,6))+'.')}
+onChange(updateBadges);
+$('invBadge').onclick=$('orcBadge').onclick=()=>{location.hash='#data';setTimeout(()=>{$('invDetails').open=true;$('invDetails').scrollIntoView({block:'center'})},50)};
+
+/* ---------- Live index section ---------- */
+const main=TreeView($('cvIndex'),{getIx:()=>ix,colorOf:id=>colorOf.get(id),track:true,getQuery:()=>query,getScale:()=>scale,debug:()=>debug,
+  onSelect:showSel,onSync:V=>{const cb=$('capBadge');if(V.capped){cb.style.display='inline-block';cb.textContent='Showing top 7 levels of '+V.height+' · '+V.count.toLocaleString()+' nodes'}else cb.style.display='none'}});
+function showSel(q){const el=$('selInfo');if(!q){el.innerHTML='<span class="muted">Click a node or a block in the 3D view.</span>';return}
+  const n=q.e-q.s+1;el.innerHTML='<b style="font-size:18px">['+q.s.toLocaleString()+', '+q.e.toLocaleString()+']</b><br>'+n.toLocaleString()+' ID'+(n>1?'s':'')+' · depth '+q.d+' · height '+q.h+' · balance '+q.bf+
+   '<br><span class="muted">Left child '+iv(q.l)+' · right child '+iv(q.r)+'</span><br><span class="muted">The blue ray links this node to its block on the track.</span>'}
+
+function opText(o){return o.t==='ins'?'insert '+o.x:o.t==='rng'?'insert range ['+o.L+','+o.R+']':o.t==='del'?'remove '+o.x:'mode '+(o.b?'AVL':'Unbalanced')}
+function opsToCode(list){return 'LAI1:'+list.map(o=>o.t==='ins'?'i'+o.x:o.t==='del'?'d'+o.x:o.t==='rng'?'r'+o.L+'-'+o.R:'m'+(o.b?1:0)).join('.')}
+function codeToOps(code){code=code.trim();if(!code.startsWith('LAI1:'))throw new Error('A share code starts with LAI1:');const body=code.slice(5);if(!body)return[];
+  return body.split('.').map(tok=>{let m;if(m=/^i(\d+)$/.exec(tok))return{t:'ins',x:chk(+m[1])};if(m=/^d(\d+)$/.exec(tok))return{t:'del',x:chk(+m[1])};
+   if(m=/^r(\d+)-(\d+)$/.exec(tok)){const L=chk(+m[1]),R=chk(+m[2]);if(L>R)throw new Error('Bad range in code');return{t:'rng',L,R}}
+   if(m=/^m([01])$/.exec(tok))return{t:'mode',b:m[1]==='1'};throw new Error('Unreadable part: '+tok.slice(0,20))})}
+
+function captionFor(r){const n=ix.count;let t='';const c=COL[r.kind]||'#8a8f98';
+  if(r.op==='insert'){const f='floor('+r.x+') = '+iv(r.floor)+', higher('+r.x+') = '+iv(r.higher)+'. ';
+    t={NEW:'<b>'+r.x+' arrived.</b> '+f+'Neither touches '+r.x+', so a new range ['+r.x+','+r.x+'] starts.',
+     EXTEND_RIGHT:'<b>'+r.x+' arrived.</b> '+f+iv(r.floor)+' ends at '+(r.x-1)+', so it grows to '+iv(r.result)+'.',
+     EXTEND_LEFT:'<b>'+r.x+' arrived.</b> '+f+iv(r.higher)+' starts at '+(r.x+1)+', so it grows to '+iv(r.result)+'.',
+     BRIDGE:'<b>'+r.x+' fills the hole.</b> '+iv(r.floor)+' ends at '+(r.x-1)+' and '+iv(r.higher)+' starts at '+(r.x+1)+', so they merge into '+iv(r.result)+'. Only these two neighbours were examined.',
+     DUPLICATE:'<b>'+r.x+' is already here</b>, inside '+iv(r.floor)+'. Nothing changes.'}[r.kind]}
+  else if(r.op==='range')t='<b>Range ['+r.L+','+r.R+'] inserted.</b> '+(r.absorbed.length?'It absorbed '+r.absorbed.map(iv).join(' ')+' and ':'')+'became '+iv(r.result)+'.';
+  else if(r.op==='delete')t={NOT_PRESENT:'<b>'+r.x+' is not in the index</b>, so nothing is removed.',REMOVED:'<b>'+r.x+' removed.</b> Its single-ID range is gone.',
+    SHRINK:'<b>'+r.x+' removed</b> from the edge of '+iv(r.was)+', which becomes '+iv(r.result[0])+'.',SPLIT:'<b>'+r.x+' removed</b> from the middle of '+iv(r.was)+', which splits into '+iv(r.result[0])+' and '+iv(r.result[1])+'.'}[r.kind];
+  else t='<b>Mode is now '+(r.b?'AVL':'Unbalanced')+'.</b> '+(r.b?'The tree was rebuilt balanced; new arrivals rotate when needed.':'New arrivals will not rotate, so sorted input makes a tall chain.');
+  if(r.rot&&r.rot.length)t+=' Rebalanced: '+r.rot.map(o=>o.type+' rotation at '+iv(o.at)).join(', ')+'.';
+  if(r.op!=='mode')t+=' <span class="muted">Visited '+r.visited+' nodes; log₂ n ≈ '+(n?Math.log2(n+1).toFixed(1):0)+'.</span>';
+  return{t,c}}
+function setCaption(r){const {t,c}=captionFor(r);$('caption').innerHTML=t;$('caption').style.borderLeftColor=c}
+function say(html,c){$('caption').innerHTML=html;$('caption').style.borderLeftColor=c||'var(--grey)'}
+
+function commit(op){ops.length=cur;opRes.length=cur;opTimes.length=cur;ops.push(op);cur++;const r=applyOp(ix,orc,op);r.h=ix.height();r.n=ix.count;opRes.push(r);opTimes.push(Date.now());bugged=false;
+  if(r.id&&COL[r.kind])colorOf.set(r.id,COL[r.kind]);caseCount[r.kind]=(caseCount[r.kind]||0)+1;rotTotal+=(r.rot||[]).length;
+  if(op.t!=='mode')visHist.push({v:r.visited,lg:2*Math.log2(ix.count+1),kind:r.kind,label:'#'+cur+' '+opText(op)});heightHist.push(ix.height());
+  logLines.push(String(cur).padStart(3,' ')+'  '+opText(op).padEnd(26,' ')+(NAME[r.kind]||'')+(r.result&&r.result.length&&typeof r.result[0]==='number'?' → '+iv(r.result):'')+((r.rot||[]).length?'  ['+r.rot.map(o=>o.type).join(',')+']':''));
+  return r}
+async function animateOp(op){const g=gen;const base=window.__route==='tree'?900/+$('speed').value:(reduced?60:240);const r=commit(op);
+  if(op.t==='mode'){setCaption(r);main.sync(true,base);changed();return}
+  await animOp(main,ix,r,{base,alive:()=>g===gen,focus:window.__route==='tree',onCase:()=>setCaption(r),onRotate:()=>setCaption(r)});
+  if(g===gen)changed()}
+async function pump(){if(busy)return;busy=true;const g=gen;
+  while(queue.length&&g===gen){if(!playing&&!stepOnce)break;stepOnce=false;await animateOp(queue.shift())}
+  if(g===gen)busy=false;updQueue()}
+function updQueue(){$('queueOut').textContent=queue.length?queue.length+' waiting':'';$('play').textContent=playing?'Pause':'Play';$('play').classList.toggle('on',playing)}
+function enqueue(list){queue.push(...list);updQueue();pump()}
+function instant(list){for(const o of list)commit(o);main.sync(false);changed()}
+function rebuild(){gen++;queue=[];busy=false;ix=new IntervalIndex();orc=new Oracle();colorOf=new Map();opRes=[];for(const k in caseCount)delete caseCount[k];rotTotal=0;visHist=[];heightHist=[];
+  for(const o of ops.slice(0,cur)){const r=applyOp(ix,orc,o);r.h=ix.height();r.n=ix.count;opRes.push(r);if(r.id&&COL[r.kind])colorOf.set(r.id,COL[r.kind]);caseCount[r.kind]=(caseCount[r.kind]||0)+1;rotTotal+=(r.rot||[]).length;if(o.t!=='mode')visHist.push({v:r.visited,lg:2*Math.log2(r.n+1),kind:r.kind,label:'#'+opRes.length+' '+opText(o)});heightHist.push(r.h)}
+  while(opTimes.length<cur)opTimes.push(Date.now());
+  bugged=false;main.clearGlow();main.clearTags();main.clearPkg();main.sync(false);changed();updQueue()}
+function hardReset(){ops=[];cur=0;opTimes=[];logLines=[];query=null;$('qL').value=$('qR').value='';rebuild();say('Index cleared.')}
+
+function renderIndexPanels(){const list=query?ix.query(query[0],query[1]):null;const ivs=list?list.intervals:ix.intervals();
+  let gaps=list?list.gaps:[];if(!list)for(let i=1;i<ivs.length;i++)gaps.push([ivs[i-1][1]+1,ivs[i][0]-1]);
+  $('ivTitle').textContent=query?'Arrived inside ['+query[0]+', '+query[1]+']':'Arrived ranges';$('gapTitle').textContent=query?'Missing inside ['+query[0]+', '+query[1]+']':'Missing between them';
+  const chips=(a,c)=>a.length?a.slice(0,60).map(x=>'<span class="chip '+c+'">'+iv(x)+'</span>').join('')+(a.length>60?'<span class="small muted">and '+(a.length-60)+' more</span>':''):'<span class="small muted">None</span>';
+  $('ivList').innerHTML=chips(ivs,'');$('gapList').innerHTML=chips(gaps,'gap');
+  $('undo').disabled=cur===0;$('redo').disabled=cur>=ops.length;$('mAVL').classList.toggle('on',ix.balanced);$('mUnb').classList.toggle('on',!ix.balanced)}
+onChange(renderIndexPanels);
+
+$('addBtn').onclick=()=>{try{enqueue(parseList($('ids').value).map(x=>({t:'ins',x})));$('idsErr').textContent='';$('ids').value=''}catch(e){$('idsErr').textContent=e.message}};
+$('ids').addEventListener('keydown',e=>{if(e.key==='Enter')$('addBtn').click()});$('ids').addEventListener('input',()=>$('idsErr').textContent='');
+$('qBtn').onclick=()=>{try{const L=parseId($('qL').value),R=parseId($('qR').value);if(L>R)throw new Error('From must be less than or equal to To');query=[L,R];$('qErr').textContent='';main.sync(false);changed()}catch(e){$('qErr').textContent=e.message}};
+$('qClear').onclick=()=>{query=null;$('qL').value=$('qR').value='';$('qErr').textContent='';main.sync(false);changed()};
+$('rBtn').onclick=()=>{try{const L=parseId($('rL').value),R=parseId($('rR').value);if(L>R)throw new Error('From must be less than or equal to To');enqueue([{t:'rng',L,R}]);$('moreErr').textContent=''}catch(e){$('moreErr').textContent=e.message}};
+$('dBtn').onclick=()=>{try{enqueue([{t:'del',x:parseId($('dX').value)}]);$('moreErr').textContent=''}catch(e){$('moreErr').textContent=e.message}};
+function setMode(b){if(ix.balanced===b)return;const r=commit({t:'mode',b});setCaption(r);main.sync(true,700);changed()}
+$('mAVL').onclick=()=>setMode(true);$('mUnb').onclick=()=>setMode(false);
+function setScale(s){scale=s;$('sLin').classList.toggle('on',s==='linear');$('sCmp').classList.toggle('on',s==='compressed');main.sync(true,900)}
+$('sLin').onclick=()=>setScale('linear');$('sCmp').onclick=()=>setScale('compressed');
+$('dbg').onchange=e=>{debug=e.target.checked};
+$('undo').onclick=()=>{if(cur>0){cur--;logLines.push('     undo');rebuild();say('<b>Undone.</b> Back to '+cur+' operations.')}};
+$('redo').onclick=()=>{if(cur<ops.length){cur++;logLines.push('     redo');rebuild();say('<b>Redone:</b> '+opText(ops[cur-1])+'.')}};
+$('reset').onclick=hardReset;
+$('play').onclick=()=>{playing=!playing;updQueue();pump()};
+$('step').onclick=()=>{playing=false;stepOnce=true;updQueue();pump()};
+$('speed').oninput=e=>$('speedOut').textContent=e.target.value+'×';
+$('fit').onclick=()=>main.resetView();
+
+function preset(p){const bal=ix.balanced;hardReset();playing=true;
+  if(p===1){query=[1,7];$('qL').value=1;$('qR').value=7;main.sync(false);changed();say('<b>Preset 1.</b> Packages 1, 3, 7, 2, 6 arrive in that order. The window [1,7] is selected, so the missing range shows on the track.');enqueue([1,3,7,2,6].map(x=>({t:'ins',x})))}
+  if(p===2){instant([1,2,3,5,6,7,8].map(x=>({t:'ins',x})));say('<b>Preset 2.</b> The index holds [1,3] and [5,8]. Package 4 is about to arrive.');const g=gen;setTimeout(()=>{if(g===gen)enqueue([{t:'ins',x:4}])},1400)}
+  if(p===3){setScale('compressed');instant([7,8,9].map(x=>({t:'ins',x})));say('<b>Preset 3.</b> Widely spaced IDs up to 1,000,000,000. The tree grows by one node per range, not per number. The Dashboard memory towers show the difference.');
+    enqueue([0,500000000,1000000000,10,999999999].map(x=>({t:'ins',x})))}
+  if(p===4){if(!bal)instant([{t:'mode',b:false}]);const xs=[];for(let i=1;i<=16;i++)xs.push(2*i);$('speed').value=4;$('speedOut').textContent='4×';
+    say('<b>Preset 4.</b> Sorted IDs 2, 4, 6 … 32, spaced so they never merge. Mode: '+(bal?'AVL. Rotations keep the height near log₂ n. Switch to Unbalanced and run it again.':'Unbalanced. Each node hangs off the last one, so the height grows to n. Switch to AVL and run it again.'));
+    enqueue(xs.map(x=>({t:'ins',x})))}}
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>preset(+b.dataset.p));
+
+document.addEventListener('keydown',e=>{const tag=(e.target.tagName||'').toLowerCase();if(tag==='input'||tag==='textarea'||tag==='select'||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(window.__route!=='tree')return;
+  if(e.key===' '){e.preventDefault();if(queue.length){if(playing){playing=false;updQueue()}else{stepOnce=true;pump()}}else{playing=!playing;updQueue()}}
+  else if(e.key==='ArrowLeft'){e.preventDefault();$('undo').click()}else if(e.key==='ArrowRight'){e.preventDefault();$('redo').click()}
+  else if(/^[1-4]$/.test(e.key))preset(+e.key);
+  else if(e.key==='?'){const k=$('keys');k.style.display=k.style.display==='block'?'none':'block'}});
+
+/* ---------- Warehouse home: 3D hangar ---------- */
+const HG={mode:'overview',layout:{items:[],rows:1,maxW:20,more:false},pos:new Map(),born:new Map(),drop:null,flash:null,hover:null,lastR:null};
+const BOXC=['#1d4ed8','#2563eb','#1e40af','#3b82f6'];
+const hangS=Mini3D($('cvHangar'),{theta:0.75,phi:1.05,minDist:14,build:hangBuild,onHover:id=>{HG.hover=id;hangHoverInfo()},onPick:id=>{HG.hover=id;hangHoverInfo()}});
+$('cvHangar').addEventListener('pointerdown',()=>{if(HG.mode!=='manual'){HG.mode='manual';camTabs()}});
+function hangLayout(){let segs=[];
+  if(query){const r=ix.query(query[0],query[1]);segs=[...r.intervals.map(b=>({s:b[0],e:b[1],g:0})),...r.gaps.map(b=>({s:b[0],e:b[1],g:1}))].sort((a,b)=>a.s-b.s)}
+  else{const b=ix.intervals();for(let i=0;i<b.length;i++){if(i)segs.push({s:b[i-1][1]+1,e:b[i][0]-1,g:1});segs.push({s:b[i][0],e:b[i][1],g:0})}}
+  const more=segs.length>48;if(more)segs=segs.slice(0,48);
+  const RW=5.2,GW=2.8,MAXROW=38;let x=0,row=0;const rowW=[];
+  for(const s of segs){const w=s.g?GW:RW;if(x>0&&x+w>MAXROW){rowW.push(x-0.8);x=0;row++}s.row=row;s.x=x+w/2;s.w=w;x+=w+0.8}
+  rowW.push(Math.max(0,x-0.8));
+  segs.forEach((s,i)=>{s.cx=s.x-rowW[s.row]/2;s.cz=-s.row*9;if(!s.g){const n=ix.floor(s.s);s.key=n?n.id:'x'+i}else s.key='g'+s.s});
+  return{items:segs,rows:row+1,maxW:Math.max(14,...rowW),more}}
+function hangFit(){const L=HG.layout;hangS.fit([-L.maxW/2-1,L.maxW/2+1,0,6.6,-(L.rows-1)*9-1.5,1.5])}
+function hangBuild(S,now){const L=HG.layout;const t=now/1000;
+  const ext=[-L.maxW/2-6,L.maxW/2+6,-(L.rows-1)*9-6,6];S.floor(0,ext,'#22d3ee',Math.min(40,Math.round((ext[1]-ext[0])/2)),0.16);
+  if(HG.mode==='orbit'){S.theta+=0.0035;if(Math.round(now/16)%30===0)hangFit()}
+  if(HG.mode==='scanner'){const sx=Math.sin(t*0.35)*L.maxW/2;const z=-(Math.floor((t*0.35/Math.PI/2))%L.rows)*9;S.userMoved=false;S.goal={tgt:[sx,2.4,z],dist:12};S.theta=0.08;S.phi=1.4;
+    S.line([[sx,0.05,z-1.6],[sx,6,z-1.6]],{color:'#22d3ee',width:3,zBias:-40});S.line([[sx-0.4,6,z-1.6],[sx+0.4,6,z-1.6]],{color:'#22d3ee',width:3,zBias:-40})}
+  if(!L.items.length){S.label([0,2.5,0],'EMPTY HANGAR — ADD A PACKAGE',{size:0.8,color:'#5f7a96'});return}
+  for(const s of L.items){let p=HG.pos.get(s.key);if(!p){p=[s.cx,s.cz];HG.pos.set(s.key,p);HG.born.set(s.key,now)}p[0]+=(s.cx-p[0])*0.14;p[1]+=(s.cz-p[1])*0.14;
+    const [cx,cz]=p;
+    if(s.g){const hw=s.w/2-0.15;const y=0.03;const col='#f59e0b';
+      S.line([[cx-hw,y,cz-1.1],[cx+hw,y,cz-1.1],[cx+hw,y,cz+1.1],[cx-hw,y,cz+1.1],[cx-hw,y,cz-1.1]],{color:col,width:2,dash:[5,4],dashOff:-t*12});
+      S.box({x:cx,y:0.02,z:cz,w:s.w-0.4,h:0.04,d:2.1,color:'#f59e0b',alpha:0.12,id:s.key,shadow:false});
+      S.label([cx,1.3,cz],'GAP',{size:0.42,color:'#fbbf24'});S.label([cx,0.75,cz],(s.e-s.s+1).toLocaleString()+' missing',{size:0.32,color:'#c08a2c',mono:true});continue}
+    const n=s.e-s.s+1,grow=Math.min(1,(now-(HG.born.get(s.key)||0))/500),H=5*ease(grow)+0.01;
+    const fl=HG.flash&&HG.flash.key===s.key&&now-HG.flash.t0<1400?HG.flash.c:null;const hv=HG.hover===s.key;
+    const post={w:0.14,h:H,d:0.14,color:'#0b1322',edge:'rgba(34,211,238,.45)',shadow:false,id:s.key};
+    for(const dx of [-2.45,2.45])for(const dz of [-1.0,1.0])S.box(Object.assign({},post,{x:cx+dx,y:H/2,z:cz+dz}));
+    for(const sy of [0.12,1.72,3.32])if(sy<H)S.box({x:cx,y:sy,z:cz,w:5.0,h:0.1,d:2.1,color:'#0c1626',edge:'rgba(34,211,238,.25)',shadow:false,id:s.key,glow:fl||(hv?'#22d3ee':null)});
+    S.box({x:cx,y:H,z:cz-1.0,w:5.0,h:0.06,d:0.06,color:'#22d3ee',shadow:false});S.box({x:cx,y:H,z:cz+1.0,w:5.0,h:0.06,d:0.06,color:'#22d3ee',shadow:false});
+    if(grow<1)continue;
+    const shown=Math.min(12,n);const dr=HG.drop&&HG.drop.key===s.key?HG.drop:null;const dSlot=dr?Math.min(11,dr.x-s.s):-1;
+    for(let i=0;i<shown;i++){const col=i%4,lv=Math.floor(i/4);let y=0.17+lv*1.6+0.5;
+      if(i===dSlot&&dr){const k=Math.min(1,(now-dr.t0)/700);y+=7*(1-ease(k))}
+      S.box({x:cx-1.65+col*1.1,y,z:cz,w:0.95,h:0.95,d:0.95,color:BOXC[(s.s+i)%4],edge:'rgba(147,197,253,.35)',shadow:false,id:s.key,glow:i===dSlot&&dr&&now-dr.t0<1500?'#22d3ee':null})}
+    S.label([cx,5.75,cz],s.s===s.e?fmt(s.s):fmt(s.s)+'–'+fmt(s.e),{size:0.48,color:'#e6f1ff'});
+    S.label([cx,6.45,cz],n.toLocaleString()+(n===1?' PKG':' PKGS'),{size:0.34,pill:'rgba(45,212,191,.9)',color:'#062a24'})}}
+function hangHoverInfo(){const el=$('hangHover');const s=HG.layout.items.find(q=>q.key===HG.hover);if(!s){el.style.display='none';return}
+  el.style.display='block';const n=s.e-s.s+1;el.innerHTML=s.g?'GAP <b>['+s.s.toLocaleString()+' .. '+s.e.toLocaleString()+']</b><br>'+n.toLocaleString()+' ID'+(n>1?'S':'')+' NOT ARRIVED':'RACK <b>['+s.s.toLocaleString()+', '+s.e.toLocaleString()+']</b><br>'+n.toLocaleString()+' PACKAGE'+(n>1?'S':'')+(n>12?' · 12 SHOWN':'')}
+const CAMS={overview:[0.75,1.05],bays:[0,1.36],top:[0,0.06],orbit:[0.75,1.0],scanner:[0.08,1.4]};
+function setCam(m){HG.mode=m;hangS.userMoved=false;if(CAMS[m]){hangS.theta=CAMS[m][0];hangS.phi=CAMS[m][1]}if(m!=='scanner')hangFit();camTabs()}
+function camTabs(){document.querySelectorAll('[data-cam]').forEach(b=>b.classList.toggle('on',b.dataset.cam===HG.mode))}
+document.querySelectorAll('[data-cam]').forEach(b=>b.onclick=()=>setCam(b.dataset.cam));
+
+/* ---------- KPIs, interval cards, HUD ---------- */
+function renderHome(){if(query&&document.activeElement!==$('hS')&&document.activeElement!==$('hE')){$('hS').value=query[0];$('hE').value=query[1]}HG.layout=hangLayout();if(HG.mode!=='scanner'&&HG.mode!=='manual')hangFit();
+  const r=opRes[cur-1];if(r&&r!==HG.lastR){HG.lastR=r;const now=performance.now();if(r.op==='insert'&&r.id&&r.kind!=='DUPLICATE')HG.drop={key:r.id,x:r.x,t0:now};if(r.id)HG.flash={key:r.id,c:COL[r.kind],t0:now}}
+  const ivs=ix.intervals();const k=ivs.length;const ids=ivs.reduce((a,b)=>a+b[1]-b[0]+1,0);
+  let miss=0;if(query){miss=ix.query(query[0],query[1]).gaps.reduce((a,g)=>a+g[1]-g[0]+1,0)}else for(let i=1;i<k;i++)miss+=ivs[i][0]-ivs[i-1][1]-1;
+  $('kU').textContent=ids.toLocaleString();$('kI').textContent=k.toLocaleString();$('kM').textContent=(miss>=1e6?fmt(miss):miss.toLocaleString())+' MISSING';
+  $('kMl').textContent=query?'Missing in range':'Missing between';$('kMd').textContent=query?'Gaps in query ['+query[0].toLocaleString()+' .. '+query[1].toLocaleString()+']':'Gaps between the first and last ID';
+  $('kD').textContent=(caseCount.DUPLICATE||0).toLocaleString();$('kCd').textContent='Max comparisons ≈ '+(k?Math.log2(k+1):0).toFixed(1)+' steps · height '+ix.height();
+  $('hud').innerHTML='UNIQUE ARRIVALS: <b>'+ids.toLocaleString()+'</b><br>ACTIVE INTERVALS (k): <b>'+k.toLocaleString()+'</b><br>DUPLICATES FILTERED: <b>'+(caseCount.DUPLICATE||0)+'</b>';
+  $('hangCap').textContent=(query?'Showing the window ['+query[0].toLocaleString()+' .. '+query[1].toLocaleString()+']. ':'')+'Each rack is one range and holds up to 12 boxes; bigger ranges show their full count on the label. Amber bays are missing IDs.'+(HG.layout.more?' Showing the first 48 racks and bays.':'');
+  const strip=$('ivStrip');if(!k){strip.innerHTML='<span class="desc">No packages yet. Add one below or pick a scenario.</span>'}
+  else{const last=r&&r.result&&typeof r.result[0]==='number'?r.result:null;let h='';const lim=Math.min(k,60);
+    for(let i=0;i<lim;i++){const [s,e]=ivs[i];if(i){const a=ivs[i-1][1]+1,b=s-1,m=b-a+1;h+='<div class="gapc">GAP ['+fmt(a)+(a===b?'':'..'+fmt(b))+']<hr><span>'+(m>=1e6?fmt(m):m.toLocaleString())+' MISSING</span></div>'}
+      const n=e-s+1,isNew=last&&last[0]===s&&last[1]===e;h+='<div class="ivc'+(isNew?' new':'')+'"><div class="n">INTERVAL #'+(i+1)+'</div><div class="v">['+fmt(s)+', '+fmt(e)+']</div><span class="k">'+(n>=1e6?fmt(n):n.toLocaleString())+' PACKAGE'+(n>1?'S':'')+'</span></div>'}
+    if(k>lim)h+='<div class="gapc">+'+(k-lim)+' more</div>';strip.innerHTML=h}
+  renderGaps();renderAudit()}
+onChange(renderHome);
+
+/* ---------- ingest ---------- */
+function hErr(m){$('hErr').textContent=m||''}
+$('hAdd').onclick=()=>{try{enqueue([{t:'ins',x:parseId($('hPkg').value)}]);$('hPkg').value='';hErr()}catch(e){hErr(e.message)}};
+$('hPkg').addEventListener('keydown',e=>{if(e.key==='Enter')$('hAdd').click()});$('hPkg').addEventListener('input',()=>hErr());
+$('hNext').onclick=()=>{const a=ix.intervals();const x=a.length?Math.min(MAXID,a[a.length-1][1]+1):1;enqueue([{t:'ins',x}]);hErr()};
+$('hRand').onclick=()=>{enqueue([{t:'ins',x:1+Math.floor(Math.random()*100)}]);hErr()};
+$('hBig').onclick=()=>{enqueue([{t:'ins',x:1000000000}]);hErr()};
+$('hBatchBtn').onclick=()=>{try{enqueue(parseList($('hBatch').value).map(x=>({t:'ins',x})));$('hBatch').value='';hErr()}catch(e){hErr(e.message)}};
+$('hBatch').addEventListener('keydown',e=>{if(e.key==='Enter')$('hBatchBtn').click()});$('hBatch').addEventListener('input',()=>hErr());
+$('resetAll').onclick=()=>{hardReset();for(const c of document.querySelectorAll('.sc .st'))c.textContent='';HG.pos.clear()};
+
+/* ---------- gap analysis ---------- */
+function setQuery(q){query=q;if(q){$('qL').value=$('hS').value=q[0];$('qR').value=$('hE').value=q[1]}else{$('qL').value=$('qR').value=''}main.sync(false);changed()}
+$('hAnalyze').onclick=()=>{try{const a=parseId($('hS').value),b=parseId($('hE').value);if(a>b)throw new Error('Start must be less than or equal to End');$('hQErr').textContent='';setQuery([a,b])}catch(e){$('hQErr').textContent=e.message}};
+$('hClearQ').onclick=()=>{$('hQErr').textContent='';setQuery(null)};
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const [a,c]=b.dataset.q.split(',').map(Number);$('hQErr').textContent='';setQuery([a,c])});
+function renderGaps(){const el=$('hGaps');if(!query){$('hQTitle').textContent='Missing ranges';el.innerHTML='<span class="desc">Press "Analyze gaps" to look inside a window.</span>';return}
+  const r=ix.query(query[0],query[1]);const tot=r.gaps.reduce((a,g)=>a+g[1]-g[0]+1,0);
+  $('hQTitle').textContent='Missing ranges in ['+query[0].toLocaleString()+' .. '+query[1].toLocaleString()+'] · '+tot.toLocaleString()+' IDs · '+r.visited+' nodes visited';
+  el.innerHTML=r.gaps.length?r.gaps.slice(0,80).map(g=>{const m=g[1]-g[0]+1;return'<span class="chip gap">['+g[0].toLocaleString()+(g[0]===g[1]?'':' .. '+g[1].toLocaleString())+']<small>'+(m>=1e6?fmt(m):m.toLocaleString())+' missing</small></span>'}).join('')+(r.gaps.length>80?'<span class="desc">and '+(r.gaps.length-80)+' more</span>':''):'<span class="desc">No gaps: every ID in this window has arrived.</span>'}
+
+/* ---------- demonstration scenarios ---------- */
+const SCEN=[
+ {n:'Illustrative example',d:'Arrivals: [1, 3, 7, 2, 6] → [[1,3], [6,7]]',xs:[1,3,7,2,6],ex:[[1,3],[6,7]],q:[1,7]},
+ {n:'Bridge merge',d:'Arrivals: [1,2,3, 5] then 4 bridges into [1,5]',xs:[1,2,3,5,4],ex:[[1,5]]},
+ {n:'No false merge',d:'Arrivals: [1..4] & [6..7]. Missing 5 keeps them separate',xs:[1,2,3,4,6,7],ex:[[1,4],[6,7]]},
+ {n:'Duplicate filter',d:'Arrivals: [1, 1, 1, 2, 2] → [[1,2]], 3 duplicates',xs:[1,1,1,2,2],ex:[[1,2]],dup:3},
+ {n:'Left extension',d:'[5,6,7] extended left by 4 → [4,7]',xs:[5,6,7,4],ex:[[4,7]]},
+ {n:'Right extension',d:'[1,2,3] extended right by 4 → [1,4]',xs:[1,2,3,4],ex:[[1,4]]},
+ {n:'Sparse IDs',d:'[10, 1,000,000, 500,000,000] → O(k) memory, no giant array',xs:[10,1000000,500000000],ex:[[10,10],[1000000,1000000],[500000000,500000000]]},
+ {n:'Large ID boundary',d:'0 and the 1-billion maximum, without overflow',xs:[0,999999999,1000000000],ex:[[0,0],[999999999,1000000000]]},
+ {n:'Progressive bridge',d:'[1,3], [7,9] → +5 → +4 → +6 → [1,9]',xs:[1,2,3,7,8,9,5,4,6],ex:[[1,9]]}];
+$('scen').innerHTML=SCEN.map((s,i)=>'<button class="sc" data-s="'+i+'"><b>'+(i+1)+'. '+s.n+'</b><span>'+s.d+'</span><div class="st" id="st'+i+'" aria-live="polite"></div></button>').join('');
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>runScenario(+b.dataset.s));
+async function runScenario(i){const s=SCEN[i];for(const c of document.querySelectorAll('.sc .st'))c.textContent='';const st=$('st'+i);
+  hardReset();HG.pos.clear();if(s.q)setQuery(s.q);$('cvHangar').scrollIntoView({behavior:reduced?'auto':'smooth',block:'center'});const g=gen;st.className='st run';st.textContent='▶ RUNNING…';playing=true;updQueue();
+  enqueue(s.xs.map(x=>({t:'ins',x})));
+  while(g===gen&&(queue.length||busy))await sleep(80);if(g!==gen)return;
+  const got=ix.intervals();const ok=same(got,s.ex)&&(s.dup==null||(caseCount.DUPLICATE||0)===s.dup);
+  st.className='st '+(ok?'ok':'bad');st.textContent=(ok?'✓ PASS · ':'✗ FAIL · ')+JSON.stringify(got)+(s.dup!=null?' · '+(caseCount.DUPLICATE||0)+' duplicates':'')}
+
+/* ---------- home test panel ---------- */
+$('hRunTests').onclick=()=>{$('hTStat').textContent='Running…';$('hRunTests').disabled=true;setTimeout(()=>{const t0=performance.now();const T=runTests();const ms=performance.now()-t0;const pass=T.filter(x=>x.ok).length;
+  $('hTCount').textContent=T.length;$('hTStat').textContent=pass+' / '+T.length+' PASSED ('+Math.round(pass/T.length*100)+'%)';$('hTStat').style.color=pass===T.length?'var(--teal)':'var(--red)';$('hTTime').textContent=ms.toFixed(1)+' ms';
+  $('hTList').innerHTML=T.map((x,i)=>'<div class="tc'+(x.ok?'':' fail')+'"><b>#'+(i+1)+': '+x.name.replace(/[<>&]/g,'')+'</b><span class="'+(x.ok?'ok':'bad')+'">'+(x.ok?'PASS':'FAIL')+'</span><span>'+(x.ok?'Verified.':x.detail.replace(/[<>&]/g,''))+'</span><span>'+Math.round(x.ms*1000).toLocaleString()+' µs</span></div>').join('');
+  $('hRunTests').disabled=false},30)};
+
+/* ---------- audit trail ---------- */
+const OPB={NEW:['NEW INTERVAL','#2dd4bf'],EXTEND_LEFT:['EXTEND LEFT','#22c55e'],EXTEND_RIGHT:['EXTEND RIGHT','#22c55e'],BRIDGE:['BRIDGE MERGE','#a78bfa'],DUPLICATE:['DUPLICATE','#94a3b8'],RANGE:['RANGE INSERT','#60a5fa'],SPLIT:['SPLIT','#f87171'],SHRINK:['SHRINK','#f87171'],REMOVED:['REMOVED','#f87171'],NOT_PRESENT:['NOT PRESENT','#94a3b8'],MODE:['MODE','#94a3b8']};
+const I2=a=>'['+a[0]+', '+a[1]+']';
+function auditDesc(o,r){switch(r.kind){
+  case'NEW':return'New interval: Created isolated interval '+I2(r.result)+'.';
+  case'EXTEND_LEFT':return'Extended left: Interval '+I2(r.higher)+' extended left with ID '+r.x+' to '+I2(r.result)+'.';
+  case'EXTEND_RIGHT':return'Extended right: Interval '+I2(r.floor)+' extended right with ID '+r.x+' to '+I2(r.result)+'.';
+  case'BRIDGE':return'Bridge merge: Package ID '+r.x+' bridged '+I2(r.floor)+' and '+I2(r.higher)+' into '+I2(r.result)+'.';
+  case'DUPLICATE':return'Duplicate: ID '+r.x+' is already inside '+I2(r.floor)+'; ignored without changes.';
+  case'RANGE':return'Range insert: ['+r.L+', '+r.R+']'+(r.absorbed.length?' absorbed '+r.absorbed.length+' interval'+(r.absorbed.length>1?'s':''):'')+' → '+I2(r.result)+'.';
+  case'SPLIT':return'Split: Removed '+r.x+' from '+I2(r.was)+' → '+I2(r.result[0])+' and '+I2(r.result[1])+'.';
+  case'SHRINK':return'Shrink: Removed '+r.x+' from the edge of '+I2(r.was)+' → '+I2(r.result[0])+'.';
+  case'REMOVED':return'Removed: Single-ID interval ['+r.x+', '+r.x+'] deleted.';
+  case'NOT_PRESENT':return'Not present: ID '+r.x+' was not in the index.';
+  default:return'Mode: '+(r.b?'AVL balancing on; tree rebuilt balanced.':'Balancing off (Unbalanced mode).')}}
+function renderAudit(){const tb=$('audit');if(!cur){tb.innerHTML='<tr><td colspan="5" class="desc">No arrivals yet.</td></tr>';return}
+  let h='';for(let i=cur-1;i>=Math.max(0,cur-200);i--){const o=ops[i],r=opRes[i];if(!r)continue;const b=OPB[r.kind]||['?','#94a3b8'];
+    const id=o.t==='ins'||o.t==='del'?'#'+o.x.toLocaleString():o.t==='rng'?'#'+o.L+'–'+o.R:'—';
+    const ts=new Date(opTimes[i]||Date.now()).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'}).toLowerCase();
+    h+='<tr><td>#'+(i+1)+'</td><td class="id">'+id+'</td><td><span class="op" style="color:'+b[1]+';border-color:'+b[1]+';background:'+b[1]+'1a">'+b[0]+'</span></td><td class="hide">'+auditDesc(o,r)+'</td><td class="ts">'+ts+'</td></tr>'}
+  tb.innerHTML=h}
+
+/* ---------- Dashboard section ---------- */
+let visHover=null,memHover=null;
+const visS=Mini3D($('cvVisits'),{theta:0.3,phi:1.32,minDist:10,onHover:id=>{visHover=id;readVis()},onPick:id=>{visHover=id;readVis()},build(S){
+  const P=pal();const d=visHist.slice(-40);const n=d.length;const SP=1.15;const mx=Math.max(4,...d.map(p=>Math.max(p.v,p.lg)));const k=8/mx;
+  const W=Math.max(n,10)*SP;S.floor(0,[-W/2-1,W/2+1,-2,2],P.grid,12,0.35);
+  if(!n){S.label([0,1.5,0],'Each operation adds a bar',{size:0.7,color:P.muted});S.fit([-6,6,0,3,-1,1]);return}
+  for(let v=0;v<=mx;v+=Math.max(1,Math.ceil(mx/4))){S.line([[-W/2-0.6,v*k,-0.45],[W/2+0.6,v*k,-0.45]],{color:P.grid,width:1});S.label([-W/2-1.1,v*k,-0.45],String(v),{size:0.45,color:P.muted,align:'right'})}
+  d.forEach((p,i)=>{const x=-W/2+SP/2+i*SP;const h=Math.max(0.08,p.v*k);S.box({x,y:h/2,z:0,w:0.8,h,d:0.8,color:COL[p.kind]||'#8a8f98',id:i,glow:visHover===i?'#22d3ee':null,shadow:false})});
+  const lp=d.map((p,i)=>[-W/2+SP/2+i*SP,p.lg*k,0]);S.line(lp,{color:'#ffb400',width:3,zBias:-50});
+  S.label([lp[lp.length-1][0]+0.6,lp[lp.length-1][1],0],'2 log₂ n',{size:0.5,color:'#f59e0b',align:'left'});
+  S.fit([-W/2-1.5,W/2+1.5,0,8.5,-1,1])}});
+function readVis(){const d=visHist.slice(-40);const p=visHover!=null?d[visHover]:d[d.length-1];
+  $('visRead').innerHTML=p?'<b>'+p.label+'</b>: '+(NAME[p.kind]||p.kind)+'. Visited '+p.v+' nodes; 2 log₂ n was '+p.lg.toFixed(1)+' (an insert runs two searches, floor and higher).':'<span class="muted">No operations yet. Add packages on the Warehouse page.</span>'}
+const memS=Mini3D($('cvMem'),{theta:0.6,phi:1.18,minDist:12,onHover:id=>{memHover=id;readMem()},onPick:id=>{memHover=id;readMem()},build(S){
+  const P=pal();const m=memNums();const k=1.1;S.floor(0,[-6,6,-3,3],P.grid,12,0.35);
+  for(let dec=0;dec<=9;dec++){const y=dec*k;S.line([[-4.2,y,-1.6],[4.2,y,-1.6]],{color:P.grid,width:1});if(dec%3===0)S.label([-4.6,y,-1.6],dec===0?'1':dec===3?'1k':dec===6?'1M':'1B',{size:0.5,color:P.muted,align:'right'})}
+  const tw=[{id:'tree',x:-1.8,v:m.n,c:'#2dd4bf',t:'tree nodes'},{id:'arr',x:1.8,v:m.slots,c:'#ef4444',t:'array slots'}];
+  for(const t of tw){const h=Math.max(0.12,Math.log10(t.v+1)*k);S.box({x:t.x,y:h/2,z:0,w:2.2,h,d:2.2,color:t.c,id:t.id,glow:memHover===t.id?'#22d3ee':null});
+    S.label([t.x,h+0.6,0],t.v.toLocaleString(),{size:0.6,color:P.ink});S.label([t.x,-0.6,1.4],t.t,{size:0.5,color:P.muted})}
+  S.fit([-5,5,-1,10.5,-2,2])}});
+function memNums(){const a=ix.intervals();const slots=a.length?a[a.length-1][1]+1:0;return{n:ix.count,slots}}
+function readMem(){const m=memNums();if(!m.n){$('memRead').innerHTML='<span class="muted">Empty. Try scenario 7 (sparse IDs) on the Warehouse page.</span>';return}
+  const ratio=m.slots/Math.max(1,m.n);$('memRead').innerHTML=(memHover==='arr'?'<b>Array:</b> one true/false slot for every number up to '+(m.slots-1).toLocaleString()+', about '+m.slots.toLocaleString()+' bytes.':
+   '<b>Tree:</b> '+m.n.toLocaleString()+' nodes of about 48 bytes, '+(m.n*48).toLocaleString()+' bytes in all.')+' The array is '+(ratio>=10?Math.round(ratio).toLocaleString()+'×':ratio.toFixed(1)+'×')+' the size of the tree in entries.'}
+function renderDash(){const ivs=ix.intervals();const n=ix.count,h=ix.height(),bound=n?1.44*Math.log2(n+2):0;
+  $('tN').textContent=n.toLocaleString();$('tIds').textContent=ivs.reduce((a,b)=>a+b[1]-b[0]+1,0).toLocaleString();$('tH').textContent=h;$('tB').textContent=bound.toFixed(1);
+  $('tOps').textContent=cur.toLocaleString();$('tRot').textContent=rotTotal.toLocaleString();
+  $('hTxt').textContent='Height '+h+' · bound '+bound.toFixed(1)+' · '+(ix.balanced?'AVL mode':'Unbalanced mode');
+  $('hBar').style.width=Math.min(100,n?h/Math.max(h,bound*1.6,1)*100:0)+'%';$('hBar').style.background=bound&&h>bound?'var(--red)':'var(--cyan)';
+  const rows=[['New range','NEW','#3b82f6'],['Extend left','EXTEND_LEFT','#22c55e'],['Extend right','EXTEND_RIGHT','#22c55e'],['Bridge merge','BRIDGE','#f97316'],['Duplicate','DUPLICATE','#64748b'],['Range insert','RANGE','#8b5cf6'],['Removal','DEL','#8b5cf6']];
+  const cnt=k=>k==='DEL'?(caseCount.SPLIT||0)+(caseCount.SHRINK||0)+(caseCount.REMOVED||0):(caseCount[k]||0);const mx=Math.max(1,...rows.map(r=>cnt(r[1])));
+  $('caseBars').innerHTML=rows.map(r=>'<div class="hb"><span>'+r[0]+'</span><div class="meter"><i style="width:'+(cnt(r[1])/mx*100)+'%;background:'+r[2]+'"></i></div><b>'+cnt(r[1])+'</b></div>').join('');
+  readVis();readMem();drawHChart()}
+function drawHChart(){const svg=$('hChart'),box=$('hChartBox');const W=box.clientWidth,H=box.clientHeight;if(!W)return;svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  const d=heightHist.slice(-80);if(!d.length){svg.innerHTML='<text x="'+W/2+'" y="'+H/2+'" text-anchor="middle" font-size="13" fill="var(--muted)">Each operation adds a point</text>';return}
+  const mx=Math.max(3,...d)*1.15,px=i=>30+i*(W-42)/Math.max(1,d.length-1),py=v=>H-20-v/mx*(H-34);
+  svg.innerHTML='<line x1="30" x2="'+(W-12)+'" y1="'+(H-20)+'" y2="'+(H-20)+'" stroke="var(--line)"/><text x="4" y="'+(py(Math.round(mx/1.15))+4)+'" font-size="11" fill="var(--muted)">'+Math.round(mx/1.15)+'</text>'+
+   '<path d="'+d.map((v,i)=>(i?'L':'M')+px(i).toFixed(1)+' '+py(v).toFixed(1)).join('')+'" fill="none" stroke="var(--blue)" stroke-width="2.5"/>'+
+   '<text x="'+(W-12)+'" y="14" text-anchor="end" font-size="11" fill="var(--muted)">height after each operation</text>'}
+new ResizeObserver(drawHChart).observe($('hChartBox'));
+onChange(()=>{if(window.__route==='dashboard')renderDash()});
+
+/* ---------- AVL vs Unbalanced section ---------- */
+let cmpA=new IntervalIndex(true),cmpB=new IntervalIndex(false),cmpMode='sorted',cmpGen=0,cmpRot=0,cmpNew=null;
+const cmpCol=id=>id===cmpNew?'#22d3ee':null;
+const viewA=TreeView($('cvA'),{getIx:()=>cmpA,colorOf:cmpCol,minDist:10,theta:0.1,phi:1.42,onSync:()=>cmpStats()});
+const viewB=TreeView($('cvB'),{getIx:()=>cmpB,colorOf:cmpCol,minDist:10,theta:0.1,phi:1.42,onSync:()=>cmpStats()});
+function cmpStats(){const f=(I,el,bar,extra)=>{const n=I.count,h=I.height(),b=n?1.44*Math.log2(n+2):0;
+  $(el).innerHTML='<b>Height '+h+'</b> with '+n+' node'+(n===1?'':'s')+' · AVL bound '+b.toFixed(1)+extra;$(bar).style.width=(n?Math.min(100,h/Math.max(40,h)*100):0)+'%'};
+  f(cmpA,'cAtxt','cAbar',' · '+cmpRot+' rotation'+(cmpRot===1?'':'s'));f(cmpB,'cBtxt','cBbar',cmpB.count>1&&cmpB.height()===cmpB.count?' · one long chain':'')}
+function cmpList(){const n=+$('cN').value;if(cmpMode==='sorted'){const xs=[];for(let i=1;i<=n;i++)xs.push(2*i);return xs}
+  if(cmpMode==='random'){const s=new Set();const r=mkRng(Date.now());while(s.size<n)s.add(2*Math.floor(r()*500));return[...s]}
+  return parseList($('cList').value)}
+function cmpReset(){cmpGen++;cmpA=new IntervalIndex(true);cmpB=new IntervalIndex(false);cmpRot=0;cmpNew=null;viewA.snap();viewB.snap();viewA.sync(false);viewB.sync(false);$('cPlay').textContent='Play'}
+async function cmpPlay(){let xs;try{xs=cmpList();$('cErr').textContent=''}catch(e){$('cErr').textContent=e.message;return}
+  cmpReset();const g=cmpGen;$('cPlay').textContent='Playing…';
+  for(const x of xs){const ra=cmpA.insert(x);cmpB.insert(x);cmpRot+=ra.rot.length;cmpNew=ra.id??null;viewA.sync(true,380);viewB.sync(true,380);await sleep(reduced?60:440);if(g!==cmpGen)return}
+  cmpNew=null;$('cPlay').textContent='Play again'}
+function cmpSetMode(m){cmpMode=m;for(const [id,k] of [['cSorted','sorted'],['cRandom','random'],['cCustom','custom']])$(id).classList.toggle('on',k===m);
+  $('cList').style.display=m==='custom'?'block':'none';$('cN').style.display=$('cNOut').style.display=$('cN').previousElementSibling.style.display=m==='custom'?'none':'';
+  $('cDesc').textContent=m==='sorted'?'Sorted: 2, 4, 6 … (spaced so they never merge into one range).':m==='random'?'Random even numbers below 1,000, so most stay separate ranges.':'Type your own IDs in the order they arrive.'}
+$('cSorted').onclick=()=>cmpSetMode('sorted');$('cRandom').onclick=()=>cmpSetMode('random');$('cCustom').onclick=()=>cmpSetMode('custom');
+$('cN').oninput=e=>$('cNOut').textContent=e.target.value;$('cPlay').onclick=cmpPlay;$('cReset').onclick=cmpReset;
+$('cList').addEventListener('input',()=>$('cErr').textContent='');
+viewA.snap();viewB.snap();viewA.sync(false);viewB.sync(false);
+
+/* ---------- Bridge demo section ---------- */
+let brB=new IntervalIndex(),brA=new IntervalIndex(),brCol0=new Map(),brCol1=new Map(),brGen=0,brCfg=null;
+const brV0=TreeView($('cvB0'),{getIx:()=>brB,colorOf:id=>brCol0.get(id),track:true,minDist:10,theta:0.25,phi:1.25});
+const brV1=TreeView($('cvB1'),{getIx:()=>brA,colorOf:id=>brCol1.get(id),track:true,minDist:10,theta:0.25,phi:1.25});
+function brRead(){const a=parseId($('bA').value),b=parseId($('bB').value),c=parseId($('bC').value),d=parseId($('bD').value);
+  if(a>b||c>d)throw new Error('Each range must run from a smaller number to a larger one');
+  if(c!==b+2)throw new Error('The right range must start at '+(b+2)+' so exactly one ID ('+(b+1)+') is missing');
+  const other=$('bOther').value.trim()?parseRanges($('bOther').value):[];
+  for(const [s,e] of other)if(e>=a-1&&s<=d+1)throw new Error('Other range ['+s+','+e+'] touches the two ranges; move it away');
+  return{a,b,c,d,x:b+1,other}}
+function brSetup(){let cfg;try{cfg=brRead();$('bErr').textContent=''}catch(e){$('bErr').textContent=e.message;return false}
+  brGen++;brCfg=cfg;const mk=()=>{const I=new IntervalIndex();for(const [s,e] of cfg.other)I.insertRange(s,e);I.insertRange(cfg.a,cfg.b);I.insertRange(cfg.c,cfg.d);return I};
+  brB=mk();brA=mk();brCol0=new Map();brCol1=new Map();
+  const L=brB.floor(cfg.x),R=brB.higher(cfg.x);brCol0.set(L.id,'#3b82f6');brCol0.set(R.id,'#3b82f6');
+  const L1=brA.floor(cfg.x),R1=brA.higher(cfg.x);brCol1.set(L1.id,'#3b82f6');brCol1.set(R1.id,'#3b82f6');
+  brV0.snap();brV1.snap();brV0.sync(false);brV1.sync(false);brV0.clearTags();brV0.tag(L.id,'floor('+cfg.x+')');brV0.tag(R.id,'higher('+cfg.x+')');brV1.clearTags();brV1.clearGlow();
+  $('bSteps').innerHTML='<li>The index holds '+brB.intervals().map(iv).join(' ')+' in '+brB.count+' nodes.</li><li>ID '+cfg.x+' is missing between '+iv([cfg.a,cfg.b])+' and '+iv([cfg.c,cfg.d])+'. Press "Add the missing ID".</li>';
+  $('bPlay').disabled=false;$('bPlay').textContent='Add the missing ID';return true}
+async function brPlay(){if(!brCfg||brA.count!==brB.count){if(!brSetup())return;await sleep(500)}const g=brGen;const cfg=brCfg;$('bPlay').disabled=true;
+  const before=brA.count,v0=brA.visits;const r=brA.insert(cfg.x);
+  brV1.pkg(cfg.x,r.path,reduced?1:420,'#ffb400');for(const id of r.path){brV1.glow(id);await sleep(reduced?1:420);if(g!==brGen)return}
+  brV1.tag(r.floorId,'floor('+cfg.x+')');brV1.tag(r.higherId,'higher('+cfg.x+')');await sleep(reduced?1:900);if(g!==brGen)return;
+  brV1.clearPkg();brV1.clearTags();brV1.clearGlow();brCol1=new Map([[r.id,'#f97316']]);brV1.sync(true,1100);brV1.glow(r.id,'#f97316');
+  $('bSteps').innerHTML='<li><b>floor('+cfg.x+')</b> walked down the tree and found '+iv(r.floor)+'.</li><li><b>higher('+cfg.x+')</b> found '+iv(r.higher)+'. Together the two searches visited '+r.visited+' nodes.</li>'+
+   '<li>'+iv(r.floor)+' ends at '+(cfg.x-1)+' and '+iv(r.higher)+' starts at '+(cfg.x+1)+', so '+cfg.x+' bridges them.</li>'+
+   '<li>The right node was deleted and the left node now ends at '+cfg.d+': the result is <b>'+iv(r.result)+'</b>.'+(r.rot.length?' The deletion triggered '+r.rot.map(o=>o.type).join(', ')+' rotation to stay balanced.':'')+'</li>'+
+   '<li>Nodes: '+before+' before, '+brA.count+' after. '+(cfg.other.length?'The other ranges '+cfg.other.map(iv).join(' ')+' were not touched.':'')+'</li>'+
+   '<li>Invariants '+(brA.check().length?'broken':'valid')+'.</li>';
+  $('bPlay').disabled=false;$('bPlay').textContent='Play again';await sleep(1300);if(g===brGen)brV1.clearGlow()}
+$('bBuild').onclick=brSetup;$('bPlay').onclick=brPlay;
+for(const id of ['bA','bB','bC','bD','bOther'])$(id).addEventListener('input',()=>{$('bErr').textContent=''});
+brSetup();
+
+/* ---------- Tests section ---------- */
+let stressIx=new IntervalIndex(),stressHist=[];
+const stressV=TreeView($('cvStress'),{getIx:()=>stressIx,minDist:10,theta:0,phi:1.36,cap:60,capDepth:5,onSync:V=>{const c=$('stressCap');if(V.capped){c.style.display='inline-block';c.textContent='Top 5 levels of '+V.height+' · '+V.count.toLocaleString()+' nodes'}else c.style.display='none'}});
+$('runTests').onclick=()=>{$('testSum').textContent='Running…';$('runTests').disabled=true;setTimeout(()=>{const t0=performance.now();const T=runTests();const ms=performance.now()-t0;const pass=T.filter(x=>x.ok).length;
+  $('tests').innerHTML=T.map(x=>'<li><span class="'+(x.ok?'p':'f')+'">'+(x.ok?'✓':'✗')+'</span><span>'+x.name+(x.detail?' <span class="muted">('+x.detail.replace(/[<>&]/g,'')+')</span>':'')+'</span></li>').join('');
+  $('testSum').textContent=pass+' of '+T.length+' passed in '+Math.round(ms)+' ms.';$('runTests').disabled=false},30)};
+$('bug').onclick=()=>{const a=ix.intervals();if(a.length<2){$('testSum').textContent='The warehouse needs at least two separate ranges first (try scenario 1), then inject the bug.';return}
+  const n=ix.floor(a[0][0]);n.e=a[1][0];bugged='['+a[0][0]+','+a[0][1]+'] was stretched to overlap ['+a[1]+']. Undo, redo or reset on the Index tree page repairs it.';main.sync(false);changed();
+  $('testSum').textContent='Bug injected into the live index: one range now overlaps its neighbour. Both badges at the top turned red.'};
+$('stress').onclick=()=>{const btn=$('stress');btn.disabled=true;const S=new IntervalIndex(true),seen=new Set(),rnd=mkRng(Date.now()),N=50000;let t=0;stressHist=[];
+  const step=()=>{const s=performance.now();while(seen.size<N&&performance.now()-s<12){const x=Math.floor(rnd()*(MAXID+1));if(seen.has(x))continue;seen.add(x);const a=performance.now();S.insert(x);t+=performance.now()-a;
+      if(seen.size%500===0)stressHist.push([seen.size,S.height()])}
+    $('stressBar').style.width=(seen.size/N*100)+'%';drawSChart();
+    if(seen.size<N)return requestAnimationFrame(step);
+    const sorted=[...seen].sort((a,b)=>a-b);const o=new Oracle();o.iv=sorted.map(x=>[x,x]);o.norm();const ok=same(o.intervals(),S.intervals());const errs=S.check();
+    $('stressOut').innerHTML='<b>'+N.toLocaleString()+' IDs</b> inserted in '+Math.round(t)+' ms of tree work ('+(t/N*1000).toFixed(1)+' µs each). Height '+S.height()+', AVL bound '+(1.44*Math.log2(S.count+2)).toFixed(1)+'. '+S.count.toLocaleString()+' ranges. Invariants '+(errs.length?'broken':'valid')+'; brute force '+(ok?'agrees':'disagrees')+'.';
+    stressIx=S;stressV.snap();stressV.sync(true,900);btn.disabled=false};requestAnimationFrame(step)};
+function drawSChart(){const svg=$('sChart'),box=$('sChartBox');const W=box.clientWidth,H=box.clientHeight;if(!W)return;svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  if(!stressHist.length){svg.innerHTML='<text x="'+W/2+'" y="'+H/2+'" text-anchor="middle" font-size="13" fill="var(--muted)">Run the stress test to draw this</text>';return}
+  const N=50000,mx=24,px=n=>34+n/N*(W-46),py=h=>H-22-h/mx*(H-36);let bound='';for(let n=500;n<=N;n+=500)bound+=(n===500?'M':'L')+px(n).toFixed(1)+' '+py(1.44*Math.log2(n+2)).toFixed(1);
+  svg.innerHTML='<line x1="34" x2="'+(W-12)+'" y1="'+(H-22)+'" y2="'+(H-22)+'" stroke="var(--line)"/>'+[0,10,20].map(v=>'<text x="6" y="'+(py(v)+4)+'" font-size="11" fill="var(--muted)">'+v+'</text>').join('')+
+   '<text x="'+(W-12)+'" y="'+(H-6)+'" text-anchor="end" font-size="11" fill="var(--muted)">50,000 IDs</text>'+
+   '<path d="'+bound+'" fill="none" stroke="var(--muted)" stroke-dasharray="4 4" stroke-width="2"/><path d="'+stressHist.map((p,i)=>(i?'L':'M')+px(p[0]).toFixed(1)+' '+py(p[1]).toFixed(1)).join('')+'" fill="none" stroke="var(--blue)" stroke-width="2.5"/>'+
+   (W>360?'<text x="44" y="16" font-size="11" fill="var(--blue)">actual height</text><text x="140" y="16" font-size="11" fill="var(--muted)">AVL bound 1.44 log₂ n</text>':'')}
+new ResizeObserver(drawSChart).observe($('sChartBox'));stressV.snap();stressV.sync(false);
+
+/* ---------- Benchmark ---------- */
+$('benchBtn').onclick=async()=>{const btn=$('benchBtn'),tb=$('benchBody'),note=$('benchNote');btn.disabled=true;tb.innerHTML='';const CAP=1e5,CHUNK=5000;
+  for(const kind of ['random','sorted'])for(const n of [1e3,1e4,1e5]){const N=Math.min(n,CAP);const I=new IntervalIndex();const rnd=mkRng(N+(kind==='random'?1:2));const seen=kind==='random'?new Set():null;
+    const v0=I.visits;let ms=0,i=0;
+    while(i<N){await new Promise(r=>setTimeout(r,0));const t0=performance.now();const end=Math.min(N,i+CHUNK);
+      for(;i<end;i++){let x;if(seen){do x=Math.floor(rnd()*(MAXID+1));while(seen.has(x));seen.add(x)}else x=2*i;I.insert(x)}
+      ms+=performance.now()-t0;note.textContent='Running '+kind+', n = '+N.toLocaleString()+': '+i.toLocaleString()}
+    tb.insertAdjacentHTML('beforeend','<tr><td>'+kind+'</td><td>'+N.toLocaleString()+'</td><td>'+ms.toFixed(1)+'</td><td>'+((I.visits-v0)/N).toFixed(2)+'</td><td>'+I.height()+'</td><td>'+(1.44*Math.log2(N+2)).toFixed(2)+'</td></tr>')}
+  note.textContent='Done.';btn.disabled=false};
+
+/* ---------- Log and share section ---------- */
+function renderData(){$('shareCode').value=opsToCode(ops.slice(0,cur));$('log').textContent=logLines.slice(-400).join('\n')||'No operations yet.';$('log').scrollTop=1e9}
+onChange(renderData);
+const copyTxt=(txt,el,msg)=>{const fail=()=>{$(el).textContent='Copy was blocked here. Select the text and copy it yourself.'};try{navigator.clipboard.writeText(txt).then(()=>$(el).textContent=msg,fail)}catch(e){fail()}};
+$('copyLog').onclick=()=>copyTxt(logLines.join('\n'),'copyOut','Log copied.');$('copyJson').onclick=()=>copyTxt(JSON.stringify(ix.intervals()),'copyOut','Ranges copied as JSON.');
+$('copyShare').onclick=()=>copyTxt($('shareCode').value,'importErr','Share code copied.');
+$('importBtn').onclick=()=>{try{const list=codeToOps($('importCode').value);if(list.length>60000)throw new Error('That code is too long');
+  ops=list;cur=list.length;opTimes=[];logLines=list.map((o,i)=>String(i+1).padStart(3,' ')+'  '+opText(o));query=null;rebuild();
+  $('importErr').textContent='Loaded '+list.length+' operations. Open the Warehouse to see it.';say('<b>Imported.</b> '+list.length+' operations replayed.')}catch(e){$('importErr').textContent=e.message}};
+$('importCode').addEventListener('input',()=>$('importErr').textContent='');
+
+/* ---------- Story mode: enter screen, four chapters, ending ---------- */
+const FOG={rgb:[4,7,13],near:26,far:95};
+const ST={ch:0,gen:0,auto:true,waiters:[],ixA:new IntervalIndex(),ixB:new IntervalIndex(),colA:new Map(),colB:new Map(),trackA:false,trackB:false,scale:'linear',halo:true,
+  split:false,hold:false,busy:false,ops:[],cur:0,started:false,rot:{A:0,B:0},stress:null};
+const SA=TreeView($('cvSA'),{getIx:()=>ST.ixA,colorOf:id=>ST.colA.get(id),track:()=>ST.trackA,getScale:()=>ST.scale,halo:()=>ST.halo,particles:110,drift:true,fog:FOG,theta:0.35,phi:1.22,minDist:13,cap:260,capDepth:6});
+const SB=TreeView($('cvSB'),{getIx:()=>ST.ixB,colorOf:id=>ST.colB.get(id),track:()=>ST.trackB,getScale:()=>ST.scale,halo:()=>ST.halo,particles:70,drift:true,fog:FOG,theta:0.35,phi:1.22,minDist:13,cap:260,capDepth:6});
+const live=g=>()=>g===ST.gen;
+function setSplit(on){ST.split=on;$('story').classList.toggle('split',on);SA.S.snap();SB.S.snap()}
+function tags(a,b){$('tagA').innerHTML=a||'';$('tagB').innerHTML=b||''}
+function narrate(html){const box=$('stNarr');for(const p of box.querySelectorAll('p.in'))p.classList.add('old');
+  const p=document.createElement('p');p.innerHTML=html;box.appendChild(p);requestAnimationFrame(()=>requestAnimationFrame(()=>p.classList.add('in')));
+  const all=box.querySelectorAll('p');if(all.length>2)for(let i=0;i<all.length-2;i++){const q=all[i];q.classList.add('out');setTimeout(()=>q.remove(),900)}}
+function clearNarr(){$('stNarr').innerHTML=''}
+function next(g,ms){return new Promise(res=>{let done=false;const fin=()=>{if(done)return;done=true;ST.waiters=ST.waiters.filter(f=>f!==fin);res(g===ST.gen)};ST.waiters.push(fin);if(ST.auto&&ms!=null)setTimeout(fin,reduced?Math.min(ms,1500):ms)})}
+function advance(){const w=ST.waiters.slice();if(w.length)w.forEach(f=>f());else if(ST.ch===0)goChapter(1);else if(!ST.busy&&ST.ch<5)skip()}
+function panels(p1,p3,hud){$('stP1').classList.toggle('on',!!p1);$('stP3').classList.toggle('on',!!p3);$('stHud').classList.toggle('on',!!hud)}
+function chapUI(){document.querySelectorAll('[data-ch]').forEach(b=>{const n=+b.dataset.ch;b.classList.toggle('on',n===ST.ch);b.classList.toggle('done',n<ST.ch)})}
+function freshA(bal=true){ST.ixA=new IntervalIndex(bal);ST.colA=new Map();SA.clearGlow();SA.clearTags();SA.clearPkg()}
+function freshB(bal=true){ST.ixB=new IntervalIndex(bal);ST.colB=new Map();SB.clearGlow();SB.clearTags();SB.clearPkg()}
+function caseLine(r){const x=r.x;switch(r.kind){
+  case'NEW':return'Package <b>'+x+'</b> lands alone. Nothing beside it, so a new range ['+x+','+x+'] begins.';
+  case'EXTEND_RIGHT':return'<b>'+x+'</b> touches the end of '+iv(r.floor)+'. The range grows to '+iv(r.result)+'; no new node is needed.';
+  case'EXTEND_LEFT':return'<b>'+x+'</b> touches the start of '+iv(r.higher)+'. The range grows to '+iv(r.result)+'.';
+  case'BRIDGE':return'<b>'+x+'</b> closes the gap between '+iv(r.floor)+' and '+iv(r.higher)+'. Two ranges become one: '+iv(r.result)+'.';
+  case'DUPLICATE':return'<b>'+x+'</b> is already on the shelf. Duplicates change nothing.';
+  default:return''}}
+function rotLine(r){return'The tree leans two levels too far, so it rotates: <b>'+r.rot.map(o=>o.type).join(', ')+'</b>. Balance restored, height stays logarithmic.'}
+async function stInsert(view,side,x,base,g,quiet){const I=side==='A'?ST.ixA:ST.ixB,C=side==='A'?ST.colA:ST.colB;const r=I.insert(x);if(r.id&&COL[r.kind])C.set(r.id,COL[r.kind]);ST.rot[side]+=r.rot.length;
+  await animOp(view,I,r,{base,alive:live(g),focus:true,onCase:()=>{if(!quiet)narrate(caseLine(r))},onRotate:()=>{if(!quiet)narrate(rotLine(r))}});return r}
+
+/* ---------- enter screen ---------- */
+function showEnter(){ST.gen++;ST.ch=0;chapUI();setSplit(false);panels();clearNarr();tags();$('stEnd').classList.remove('on');$('stEnter').classList.add('on');
+  freshA();ST.trackA=false;ST.halo=true;const r=mkRng(7);const s=new Set();while(s.size<23)s.add(2*Math.floor(r()*60));for(const x of s){const q=ST.ixA.insert(x);if(q.id)ST.colA.set(q.id,['#3b82f6','#22c55e','#f97316','#3b82f6'][x%4])}
+  SA.S.snap();SA.sync(false)}
+/* ---------- chapters ---------- */
+async function ch1(g){setSplit(false);freshA();ST.trackA=true;ST.scale='linear';ST.halo=true;ST.ops=[];ST.cur=0;SA.S.snap();SA.sync(false);panels();
+  narrate('<b>Chapter 1 · Arrivals.</b> Packages reach the warehouse out of order. The index keeps ranges, never a list of every ID.');
+  if(!await next(g,2600))return;
+  for(const x of [1,3,7,2,6]){ST.busy=true;await stInsert(SA,'A',x,950,g);ST.busy=false;if(g!==ST.gen)return;ST.ops.push(x);ST.cur=ST.ops.length;if(!await next(g,900))return}
+  narrate('Each arrival asks only two questions: <b>floor(x)</b> and <b>higher(x)</b>. That is why every arrival costs O(log k).');
+  if(!await next(g,3200))return;
+  narrate('Your turn. <b>Press and hold</b> to stream arrivals, or type an ID. Press Next when you are ready for chapter 2.');panels(true)}
+async function ch2(g){setSplit(true);ST.halo=true;freshA();freshB();ST.trackA=ST.trackB=true;ST.scale='linear';panels();
+  for(const I of [ST.ixA,ST.ixB])for(const [a,b] of [[12,14],[20,20],[1,3],[5,8]])I.insertRange(a,b);
+  const L=ST.ixA.floor(4),R=ST.ixA.higher(4);ST.colA.set(L.id,'#3b82f6');ST.colA.set(R.id,'#3b82f6');
+  SA.S.snap();SB.S.snap();SA.sync(false);SB.sync(false);SA.tag(L.id,'floor(4)');SA.tag(R.id,'higher(4)');tags('<span class="pill gy">BEFORE</span>','<span class="pill or">AFTER</span>');
+  narrate('<b>Chapter 2 · Bridges.</b> Two ranges, [1,3] and [5,8], with a single missing ID between them.');
+  if(!await next(g,3000))return;
+  ST.busy=true;const r=await stInsert(SB,'B',4,1050,g,true);ST.busy=false;if(g!==ST.gen)return;
+  narrate('Package <b>4</b> arrives. Only two neighbours were checked, floor(4) and higher(4), so the cost stays logarithmic.');
+  if(!await next(g,2600))return;narrate('Two nodes fused into one: <b>'+iv(r.result)+'</b>. The tree got smaller, and nothing else moved.');
+  if(!await next(g,3400))return;
+  setSplit(false);tags();ST.ixA=ST.ixB;ST.colA=ST.colB;ST.ixB=new IntervalIndex();SA.clearTags();SA.clearGlow();SA.S.snap();SA.sync(false);
+  narrate('A whole truckload arrives: <b>[10, 22]</b>. One sweep absorbs every range it touches.');if(!await next(g,1800))return;
+  ST.busy=true;const r2=ST.ixA.insertRange(10,22);ST.colA.set(r2.id,COL.RANGE);await animOp(SA,ST.ixA,r2,{base:1000,alive:live(g),focus:true});ST.busy=false;if(g!==ST.gen)return;
+  narrate('It absorbed '+r2.absorbed.map(iv).join(' and ')+'. Now: '+ST.ixA.intervals().map(iv).join(' ')+'.');
+  if(!await next(g,3400))return;narrate('Package <b>16</b> is recalled. Its range splits around the hole.');if(!await next(g,1600))return;
+  ST.busy=true;const r3=ST.ixA.delete(16);ST.colA.set(r3.id,COL.SPLIT);await animOp(SA,ST.ixA,r3,{base:1000,alive:live(g),focus:true});ST.busy=false;if(g!==ST.gen)return;
+  narrate('Split into '+iv(r3.result[0])+' and '+iv(r3.result[1])+'. A split adds one node; a merge removes one. Every change stays local.')}
+function memHud(n,slots){$('stHud').innerHTML='<div class="lbl" style="margin-bottom:6px">Memory counter</div><div class="memrow"><div class="lbl"><span>AVL tree</span><span class="desc">≈'+(n*48).toLocaleString()+' bytes</span></div><b style="color:var(--teal)" id="memT">'+n.toLocaleString()+' nodes</b></div><div class="meter"><i style="width:'+Math.max(2,Math.log10(n+1)/9*100)+'%;background:var(--teal)"></i></div>'+
+  '<div class="memrow"><div class="lbl"><span>Boolean array</span><span class="desc">≈'+(slots/1e9).toFixed(2)+' GB</span></div><b style="color:#fca5a5" id="memS">0 slots</b></div><div class="meter"><i style="width:'+(Math.log10(slots+1)/9*100)+'%;background:var(--red)"></i></div><p class="desc">Log scale. The tree grows with ranges; the array grows with the largest ID.</p>';
+  const t0=performance.now(),el=$('memS');(function tick(){const k=Math.min(1,(performance.now()-t0)/1600);if(!el.isConnected)return;el.textContent=Math.round(slots*ease(k)).toLocaleString()+' slots';if(k<1)requestAnimationFrame(tick)})()}
+async function ch3(g){setSplit(false);freshA();ST.trackA=true;ST.scale='linear';ST.halo=true;$('stLin').classList.add('on');$('stCmp').classList.remove('on');SA.S.snap();SA.sync(false);panels(false,true);
+  narrate('<b>Chapter 3 · The vast gaps.</b> Now the IDs are far apart: zero, five hundred million, one billion.');if(!await next(g,2600))return;
+  for(const x of [0,500000000,1000000000]){ST.busy=true;await stInsert(SA,'A',x,850,g,true);ST.busy=false;if(g!==ST.gen)return;if(!await next(g,500))return}
+  panels(false,true,true);memHud(ST.ixA.count,1000000001);
+  narrate('A plain true/false array would need <b>1,000,000,001</b> slots. The tree needs <b>'+ST.ixA.count+'</b> nodes.');if(!await next(g,3800))return;
+  narrate('On a true scale each package is a speck on a line a billion long.');if(!await next(g,3000))return;
+  stScale('compressed');narrate('Compressed, every long gap folds into a <b>//</b> break, and the ranges become readable again.');
+  for(let i=0;i<3;i++){if(!await next(g,4200))return;stScale(ST.scale==='linear'?'compressed':'linear')}}
+function stScale(s){ST.scale=s;$('stLin').classList.toggle('on',s==='linear');$('stCmp').classList.toggle('on',s==='compressed');SA.sync(true,1400)}
+function heightHud(){const a=ST.ixA,b=ST.ixB;const bd=n=>n?1.44*Math.log2(n+2):0;const row=(nm,I,c,rot)=>'<div class="memrow"><div class="lbl"><span>'+nm+'</span><span class="desc">'+I.count+' nodes'+(rot!=null?' · '+rot+' rotations':'')+'</span></div><b style="color:'+c+'">height '+I.height()+'</b></div><div class="meter"><i style="width:'+Math.min(100,I.height()/Math.max(200,I.height())*100)+'%;background:'+c+'"></i></div>';
+  $('stHud').innerHTML='<div class="lbl" style="margin-bottom:6px">Height meter · AVL bound '+bd(a.count).toFixed(1)+'</div>'+row('AVL',a,'var(--cyan)',ST.rot.A)+row('Unbalanced',b,'#fca5a5',null)}
+async function ch4(g){setSplit(false);freshA();ST.trackA=false;ST.halo=true;SA.S.snap();SA.sync(false);panels();
+  narrate('<b>Chapter 4 · Balance.</b> A search tree is only fast while it stays short. Four shapes make it lean.');if(!await next(g,2800))return;
+  const demos=[['LL',[30,20,10],'Arrivals descend: the left side grows two levels deeper. One right rotation fixes it.'],['RR',[10,20,30],'Arrivals climb: the right side grows two deeper. One left rotation fixes it.'],
+    ['LR',[30,10,20],'Left, then right: a zig-zag. A double rotation straightens it.'],['RL',[10,30,20],'Right, then left: the mirror zig-zag, also fixed by a double rotation.']];
+  for(const [t,xs,line] of demos){freshA();SA.sync(false);tags('<span class="pill cy">'+t+' ROTATION</span>');narrate('<b>'+t+'.</b> '+line);
+    for(const x of xs){ST.busy=true;await stInsert(SA,'A',x,760,g,true);ST.busy=false;if(g!==ST.gen)return}if(!await next(g,1600))return}
+  tags();setSplit(true);freshA(true);freshB(false);ST.rot={A:0,B:0};ST.trackA=ST.trackB=false;ST.halo=false;SA.S.snap();SB.S.snap();SA.sync(false);SB.sync(false);panels(false,false,true);heightHud();
+  tags('<span class="pill cy">AVL</span>','<span class="pill rd">UNBALANCED</span>');
+  narrate('Now <b>200 sorted arrivals</b>: 2, 4, 6 … 400, spaced so they never merge. Sorted input is the worst case for a plain search tree.');if(!await next(g,3000))return;
+  let x=2;ST.busy=true;
+  for(;x<=20;x+=2){const ra=ST.ixA.insert(x);ST.rot.A+=ra.rot.length;if(ra.id)ST.colA.set(ra.id,COL.NEW);ST.ixB.insert(x);
+    await Promise.all([animOp(SA,ST.ixA,ra,{base:420,alive:live(g)}),(async()=>{SB.sync(true,420)})()]);if(g!==ST.gen){ST.busy=false;return}heightHud()}
+  narrate('Fast-forward: the remaining 190 arrive in batches. Watch the two heights.');
+  for(;x<=400;){for(let k=0;k<10&&x<=400;k++,x+=2){ST.rot.A+=ST.ixA.insert(x).rot.length;ST.ixB.insert(x)}ST.colA=new Map();SA.sync(true,260);SB.sync(true,260);heightHud();await sleep(reduced?20:300);if(g!==ST.gen){ST.busy=false;return}}
+  ST.busy=false;
+  narrate('AVL: height <b>'+ST.ixA.height()+'</b> after 200 arrivals, kept low by '+ST.rot.A+' rotations. Unbalanced: height <b>'+ST.ixB.height()+'</b>; every search walks the whole chain.');
+  if(!await next(g,5200))return;narrate('That is the whole story. Press <b>Next</b> for the verified summary.')}
+/* ---------- ending ---------- */
+function ending(){ST.gen++;const g=ST.gen;ST.ch=5;chapUI();panels();clearNarr();tags();$('stEnd').classList.add('on');
+  const inv=[ST.ixA,ST.ixB,ix].every(I=>I.check().length===0)&&!bugged;const T=runTests();const pass=T.filter(t=>t.ok).length;const fz=fuzzMismatches(10000,Date.now()%100000);
+  const k=(c,l,v,d)=>'<div class="kpi" style="--c:'+c+'"><div class="lbl">'+l+'</div><b>'+v+'</b><div class="desc">'+d+'</div></div>';
+  const draw=st=>{$('endGrid').innerHTML=k(inv?'var(--green)':'var(--red)','Invariants',inv?'ALL VALID':'BROKEN','Sorted, disjoint, non-touching; heights and AVL balance correct')+
+    k(pass===T.length?'var(--teal)':'var(--red)','Tests',pass+' / '+T.length,'Bridge, duplicates, sparse, edges, rotations, range, delete, fuzz')+
+    k(fz.mismatches?'var(--red)':'var(--cyan)','Oracle mismatches',String(fz.mismatches),fz.ops.toLocaleString()+' random operations against brute force')+
+    k('var(--violet)','Stress · 50,000 IDs',st?Math.round(st.ms)+' ms':'running…',st?'height '+st.h+' (bound '+st.b.toFixed(1)+') · '+st.n.toLocaleString()+' ranges':'IDs from 0 to 1,000,000,000')};draw(null);
+  const S=new IntervalIndex(),seen=new Set(),rnd=mkRng(Date.now()),N=50000;let t=0;
+  const step=()=>{if(g!==ST.gen)return;const s=performance.now();while(seen.size<N&&performance.now()-s<12){const x=Math.floor(rnd()*(MAXID+1));if(seen.has(x))continue;seen.add(x);const a=performance.now();S.insert(x);t+=performance.now()-a}
+    $('endBar').style.width=(seen.size/N*100)+'%';if(seen.size<N)return requestAnimationFrame(step);
+    const st={ms:t,h:S.height(),b:1.44*Math.log2(S.count+2),n:S.count};draw(st);$('endNote').textContent='Stress run in batches of about 12 ms per frame, so the page never froze. Invariants after the run: '+(S.check().length?'broken':'valid')+'.'};
+  $('endNote').textContent='Running the stress test in small batches…';requestAnimationFrame(step)}
+/* ---------- navigation ---------- */
+const CH=[null,ch1,ch2,ch3,ch4];
+function goChapter(n){if(n>4)return ending();ST.gen++;const g=ST.gen;ST.ch=n;ST.waiters=[];ST.busy=false;ST.hold=false;$('stHold').classList.remove('on');
+  $('stEnter').classList.remove('on');$('stEnd').classList.remove('on');chapUI();clearNarr();tags();SA.S.userMoved=false;SB.S.userMoved=false;CH[n](g)}
+function skip(){goChapter(ST.ch+1)}
+document.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>goChapter(+b.dataset.ch));
+$('stGo').onclick=()=>goChapter(1);$('stFree').onclick=()=>{location.hash='#index'};$('stRestart').onclick=showEnter;
+$('stNext').onclick=advance;$('stSkip').onclick=()=>{if(ST.ch===0)goChapter(1);else skip()};
+$('stAuto').onclick=()=>{ST.auto=!ST.auto;$('stAuto').textContent='Auto: '+(ST.auto?'on':'off');$('stAuto').setAttribute('aria-pressed',ST.auto);if(ST.auto)advance()};
+$('stKeysBtn').onclick=()=>{const k=$('stKeys');k.style.display=k.style.display==='block'?'none':'block'};
+$('stLin').onclick=()=>stScale('linear');$('stCmp').onclick=()=>stScale('compressed');
+/* chapter 1 interaction */
+function stPick(){const a=ST.ixA.intervals();const top=a.length?Math.min(60,a[a.length-1][1]+4):12;return Math.floor(Math.random()*(top+1))}
+async function stAddOne(x){const g=ST.gen;if(ST.ch!==1||ST.busy)return;ST.busy=true;ST.ops.length=ST.cur;ST.ops.push(x);ST.cur++;await stInsert(SA,'A',x,ST.hold?360:700,g);if(g===ST.gen)ST.busy=false}
+async function holdLoop(){while(ST.hold&&ST.ch===1){if(!ST.busy)await stAddOne(stPick());else await sleep(60)}}
+const hb=$('stHold');hb.addEventListener('pointerdown',e=>{e.preventDefault();hb.setPointerCapture(e.pointerId);ST.hold=true;hb.classList.add('on');holdLoop()});
+for(const ev of ['pointerup','pointercancel','lostpointercapture'])hb.addEventListener(ev,()=>{ST.hold=false;hb.classList.remove('on')});
+hb.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();if(!ST.busy)stAddOne(stPick())}});
+$('stAdd').onclick=()=>{try{const x=parseId($('stId').value);$('stErr').textContent='';$('stId').value='';stAddOne(x)}catch(e){$('stErr').textContent=e.message}};
+$('stId').addEventListener('keydown',e=>{if(e.key==='Enter')$('stAdd').click()});$('stId').addEventListener('input',()=>$('stErr').textContent='');
+function stReplay(){freshA();for(const x of ST.ops.slice(0,ST.cur)){const r=ST.ixA.insert(x);if(r.id&&COL[r.kind])ST.colA.set(r.id,COL[r.kind])}SA.sync(true,500)}
+function stUndo(){if(ST.ch!==1||ST.busy||ST.cur===0)return;ST.cur--;stReplay();narrate('Undone. '+ST.cur+' arrivals in this chapter.')}
+function stRedo(){if(ST.ch!==1||ST.busy||ST.cur>=ST.ops.length)return;ST.cur++;stReplay();narrate('Redone: package '+ST.ops[ST.cur-1]+'.')}
+$('stUndo').onclick=stUndo;$('stRedo').onclick=stRedo;
+document.addEventListener('keydown',e=>{if(window.__route!=='story')return;const tag=(e.target.tagName||'').toLowerCase();if(tag==='input'||tag==='textarea'||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key===' '){e.preventDefault();advance()}else if(/^[1-4]$/.test(e.key))goChapter(+e.key);else if(e.key==='ArrowLeft'){e.preventDefault();stUndo()}else if(e.key==='ArrowRight'){e.preventDefault();stRedo()}
+  else if(e.key==='?')$('stKeysBtn').click()});
+/* sound toggle (header) */
+$('sndBtn').onclick=()=>{const on=Sfx.toggle();$('sndBtn').setAttribute('aria-pressed',on);$('sndBtn').querySelector('.t').textContent=on?'Sound on':'Sound off';document.getElementById('sndWave').setAttribute('opacity',on?'1':'.25');if(on)Sfx.play('NEW')};
+/* story starts at the enter screen the first time it opens */
+function measureHeader(){document.documentElement.style.setProperty('--hh',document.querySelector('header.top').offsetHeight+'px')}
+addEventListener('resize',measureHeader);measureHeader();
+window.onRoute=h=>{measureHeader();if(h==='story'&&!ST.started){ST.started=true;showEnter()}if(h!=='story'){ST.hold=false}};
+
+/* ---------- start ---------- */
+main.snap();main.sync(false);route();updQueue();
+if(document.fonts)document.fonts.ready.then(()=>changed());
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>changed());
+
+}
+</script></body></html>

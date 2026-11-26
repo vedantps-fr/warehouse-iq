@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Warehouse IQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a mission-control console for a warehouse; precise, technical, glowing.
+   IDEA: a dark hangar where every range is a rack of packages and every gap is an empty bay.
+   PICTURE: 3D hangar, 3D index tree, 3D dashboard bars and towers, side-by-side 3D trees.
+   COLOUR and TYPE: navy #070b14 with cyan #22d3ee, teal, amber, violet, blue accents; Orbitron headings, Inter labels, JetBrains Mono data.
+   LAYOUT: header bar with tabs; KPI strip; hero 3D panel; control panels; scenarios and tests; audit trail. */
+:root{color-scheme:dark;--bg:#060a12;--bg2:#08101c;--card:#0a1322;--card2:#0d1829;--line:#16243a;--line2:#1f3350;--ink:#e6f1ff;--sub:#a9b8cc;--muted:#6f849f;
+--cyan:#22d3ee;--teal:#2dd4bf;--amber:#f59e0b;--violet:#8b5cf6;--blue:#3b82f6;--red:#ef4444;--green:#22c55e;--orange:#f97316;--grey:#64748b;
+--disp:Orbitron,Inter,system-ui,sans-serif;--sans:Inter,system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:130px}
+body{margin:0;background:radial-gradient(1200px 500px at 50% -10%,#0c1a2e 0%,var(--bg) 60%) fixed,var(--bg);color:var(--ink);font:15px/1.55 var(--sans);overflow-x:clip}
+h1,h2,h3{margin:0;font-family:var(--disp);font-weight:700;letter-spacing:.04em;text-transform:uppercase;line-height:1.15}
+h1{font-size:clamp(22px,3vw,30px)}h2{font-size:15px;color:var(--ink)}h3{font-size:12px;color:var(--sub);margin:14px 0 6px;font-family:var(--sans);font-weight:700;letter-spacing:.09em}
+p{margin:0}.muted{color:var(--muted)}.small{font-size:12.5px}.mono{font-family:var(--mono)}
+.lbl{font:700 11px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--sub)}
+.desc{font:400 12px/1.5 var(--mono);color:var(--muted)}
+header.top{position:sticky;top:0;z-index:20;background:rgba(6,10,18,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header .in{max-width:1400px;margin:0 auto;padding:10px max(2.4vw,14px) 4px;display:flex;gap:8px 18px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;gap:12px;align-items:center;text-decoration:none;color:var(--ink)}
+.brand .ic{width:40px;height:40px;border-radius:10px;border:1px solid #2a5068;background:linear-gradient(180deg,#123049,#0b1b2c);display:grid;place-items:center;box-shadow:0 0 18px rgba(34,211,238,.18)}
+.brand b{display:block;font:700 19px var(--disp);letter-spacing:.06em;background:linear-gradient(90deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.brand small{display:block;font:700 10px var(--sans);letter-spacing:.12em;color:var(--teal);text-transform:uppercase;white-space:nowrap}
+.tabs{display:flex;gap:4px;overflow-x:auto;flex:1 1 100%;order:3;scrollbar-width:none;margin:0 -4px}
+.brand{margin-right:auto}
+.tabs a{flex:none;text-decoration:none;color:var(--muted);font:600 13px var(--sans);letter-spacing:.03em;padding:10px 12px;border-radius:8px;min-height:44px;display:flex;align-items:center;border:1px solid transparent}
+.tabs a:hover{color:var(--ink);background:var(--card)}.tabs a[aria-current=page]{color:var(--cyan);background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.35)}
+.hright{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chipglow{display:inline-flex;align-items:center;gap:7px;font:600 11px var(--mono);letter-spacing:.04em;color:var(--teal);padding:6px 12px;border-radius:999px;border:1px solid rgba(45,212,191,.45);background:rgba(45,212,191,.07);white-space:nowrap}
+.chipglow i{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal)}
+.badge{display:inline-flex;align-items:center;gap:6px;font:600 11px var(--mono);padding:6px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line2);cursor:pointer;color:var(--sub);min-height:32px;white-space:nowrap}
+.badge i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}.badge.bad{border-color:var(--red);color:#fecaca}.badge.bad i{background:var(--red);box-shadow:0 0 8px var(--red)}
+.view{display:none;max-width:1400px;margin:0 auto;padding:clamp(14px,2.2vw,26px) max(2.4vw,14px) 30px}.view.on{display:block}
+.head{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:end;justify-content:space-between;margin-bottom:16px}.head p{max-width:76ch;color:var(--muted);margin-top:6px;font-size:13.5px}
+.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.card.flush{padding:0;overflow:hidden}
+.chead{display:flex;gap:10px 14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.chead h2{display:flex;align-items:center;gap:10px}.chead h2 svg{flex:none}
+.ttl-cyan{color:var(--cyan)!important}
+.panel{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:12px;padding:16px}
+.panel h3:first-child,.panel h2:first-child{margin-top:0}
+.cols{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:980px){.cols{grid-template-columns:minmax(0,1fr)}.cols>.side{order:2}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>input{flex:1 1 70px}
+input[type=text],input[type=number],textarea{font:14px var(--mono);color:var(--ink);background:#060c17;border:1px solid var(--line2);border-radius:8px;padding:9px 12px;min-height:44px;width:100%}
+input::placeholder,textarea::placeholder{color:#4b5f79}
+textarea{font:12.5px var(--mono);min-height:64px;resize:vertical}
+input:focus-visible,button:focus-visible,textarea:focus-visible,a:focus-visible,canvas:focus-visible,summary:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+button{font:700 12px var(--disp);letter-spacing:.08em;text-transform:uppercase;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line2);background:#0b1626;color:var(--sub);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+button:hover{border-color:var(--cyan);color:var(--ink)}
+button.pri{background:linear-gradient(180deg,#0f3a4a,#0b2a37);border-color:rgba(34,211,238,.7);color:#bff4ff;box-shadow:0 0 16px rgba(34,211,238,.18) inset,0 0 12px rgba(34,211,238,.12)}
+button.amb{background:linear-gradient(180deg,#3a2a0c,#2a1e08);border-color:rgba(245,158,11,.7);color:#fde3a7}
+button.blu{background:linear-gradient(180deg,#132a55,#0e1f40);border-color:rgba(59,130,246,.7);color:#cfe0ff}
+button.red{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.6);color:#fecaca}
+button.on{background:rgba(34,211,238,.12);color:var(--cyan);border-color:var(--cyan)}
+button.sm{min-height:36px;padding:0 10px;font:600 11.5px var(--mono);letter-spacing:.02em;text-transform:none}
+button:disabled{opacity:.4;cursor:default}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}.seg button{border:0;border-radius:0}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:8px}.presets button{white-space:normal;line-height:1.25;padding:8px 10px;text-align:left;justify-content:flex-start;font:600 12.5px var(--sans);letter-spacing:0;text-transform:none}.presets b{display:block;font:700 10px var(--mono);color:var(--cyan)}
+.err{color:#fca5a5;font:12.5px var(--mono);min-height:18px;margin-top:4px}
+label.chk{display:flex;gap:8px;align-items:center;font-size:14px;min-height:44px;cursor:pointer;color:var(--sub)}label.chk input{width:18px;height:18px;accent-color:var(--cyan)}
+.stage{position:relative;border-radius:10px;border:1px solid var(--line);background:radial-gradient(ellipse at 50% 30%,#0b1a2c,#04070d 75%);overflow:hidden}
+.stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.s-hero{height:clamp(340px,52vh,560px)}.s-big{height:clamp(360px,60vh,620px)}.s-mid{height:clamp(300px,44vh,440px)}.s-sm{height:300px}
+.ovl{position:absolute;font-size:12px;pointer-events:none}.ovl.tl{left:12px;top:12px}.ovl.br{right:12px;bottom:10px;color:var(--muted);font:11px var(--mono)}.ovl.bl{left:12px;bottom:12px}.ovl.tr{right:12px;top:12px}
+.hud{background:rgba(4,8,15,.82);border:1px solid var(--line2);border-radius:8px;padding:10px 12px;font:500 11.5px/1.8 var(--mono);color:var(--sub);letter-spacing:.04em}.hud b{color:var(--cyan);font-weight:700}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font:700 10.5px var(--mono);letter-spacing:.06em;background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.5)}
+.pill.cy{background:rgba(34,211,238,.1);color:var(--cyan);border-color:rgba(34,211,238,.5)}.pill.rd{background:rgba(239,68,68,.12);color:#fca5a5;border-color:rgba(239,68,68,.5)}.pill.gy{background:rgba(100,116,139,.15);color:#cbd5e1;border-color:rgba(100,116,139,.5)}.pill.or{background:rgba(249,115,22,.14);color:#fdba74;border-color:rgba(249,115,22,.5)}
+.keys{position:absolute;right:10px;bottom:34px;background:#070d18;border:1px solid var(--line2);border-radius:10px;padding:10px 14px;font:12px/1.8 var(--mono);display:none;max-width:280px;z-index:2;color:var(--sub)}
+kbd{font:11px var(--mono);border:1px solid var(--line2);border-radius:5px;padding:1px 5px;background:var(--card);color:var(--cyan)}
+.caption{min-height:52px;padding:12px 14px;border-radius:10px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--grey);font-size:14.5px;margin-top:12px;color:var(--sub)}.caption b{color:var(--ink)}
+.transport{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}.transport input[type=range],input[type=range]{accent-color:var(--cyan)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font:11.5px var(--mono);color:var(--muted);margin-top:10px}.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:20px;height:7px;border-radius:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;font:500 12px var(--mono)}
+.chip{padding:4px 9px;border-radius:6px;background:rgba(34,211,238,.08);color:var(--cyan);border:1px solid rgba(34,211,238,.3)}.chip.gap{background:rgba(245,158,11,.08);color:#fcd34d;border-color:rgba(245,158,11,.4)}
+.chip small{margin-left:6px;padding:1px 6px;border-radius:4px;background:rgba(245,158,11,.85);color:#1a1205;font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+.kpi{position:relative;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:10px;padding:14px 16px 14px 18px;overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c,var(--cyan));box-shadow:0 0 12px var(--c,var(--cyan))}
+.kpi .lbl{display:flex;justify-content:space-between;align-items:center;gap:8px}.kpi b{display:block;font:700 clamp(22px,2.3vw,28px) var(--disp);letter-spacing:.03em;margin:10px 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.tile{position:relative;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:10px;padding:12px 14px 12px 16px;overflow:hidden}.tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cyan)}
+.tile b{display:block;font:700 clamp(20px,2.2vw,26px) var(--disp);white-space:nowrap}.tile span{font:11px var(--mono);color:var(--muted)}
+.meter{height:10px;border-radius:5px;background:#0b1626;border:1px solid var(--line);overflow:hidden;margin:4px 0 10px}.meter i{display:block;height:100%;border-radius:5px;transition:width .4s}
+.hb{display:grid;grid-template-columns:110px minmax(0,1fr) 44px;gap:8px;align-items:center;font-size:13px;margin:7px 0;color:var(--sub)}.hb .meter{margin:0}.hb b{text-align:right;font:700 13px var(--mono);color:var(--ink)}
+.readout{font-size:13.5px;min-height:42px;margin-top:10px;color:var(--sub)}.readout b{color:var(--ink)}
+.tests{list-style:none;margin:10px 0 0;padding:0;font-size:13.5px;display:grid;gap:4px;color:var(--sub)}.tests li{display:flex;gap:8px;align-items:baseline}.tests .p{color:var(--green);font-weight:800}.tests .f{color:var(--red);font-weight:800}
+.log{font:12px/1.65 var(--mono);max-height:360px;overflow:auto;background:#050a13;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:0;white-space:pre;color:var(--sub)}
+.bar{height:8px;border-radius:4px;background:#0b1626;overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.info{font-size:13.5px;margin-top:6px;min-height:20px;color:var(--sub)}.info b{color:var(--ink);font-family:var(--disp)}
+.steps{padding-left:20px;margin:0;display:grid;gap:6px;font-size:13.5px;color:var(--sub)}.steps b{color:var(--ink)}
+.chart2d{height:170px;border:1px solid var(--line);border-radius:8px;background:#050a13;position:relative}.chart2d svg{position:absolute;inset:0;width:100%;height:100%}
+details summary{cursor:pointer;font:600 12px var(--mono);color:var(--muted);min-height:32px;display:flex;align-items:center}
+/* home page */
+.camtabs{display:flex;gap:6px;flex-wrap:wrap}.camtabs button{min-height:34px;padding:0 10px;font:500 11.5px var(--mono);letter-spacing:.02em;text-transform:none}
+.ivstrip{display:flex;gap:0;align-items:center;overflow-x:auto;padding:16px;border:1px solid var(--line);border-radius:10px;background:#050a13;min-height:130px}
+.ivc{flex:none;border:1px solid rgba(45,212,191,.55);border-radius:10px;background:linear-gradient(180deg,rgba(45,212,191,.12),rgba(45,212,191,.03));padding:10px 16px;text-align:center;min-width:118px;box-shadow:0 0 18px rgba(45,212,191,.1)}
+.ivc .n{font:700 10px var(--disp);letter-spacing:.1em;color:var(--teal)}.ivc .v{font:700 16px var(--disp);color:var(--ink);margin:6px 0;white-space:nowrap}.ivc .k{display:inline-block;font:700 10px var(--sans);letter-spacing:.08em;color:#062a24;background:var(--teal);border-radius:999px;padding:2px 9px}
+.ivc.new{border-color:var(--cyan);box-shadow:0 0 22px rgba(34,211,238,.35)}
+.gapc{flex:none;text-align:center;padding:0 12px;font:600 10.5px var(--mono);color:var(--amber);min-width:84px}.gapc hr{border:0;border-top:1px dashed var(--amber);margin:5px 0}.gapc span{color:#c08a2c}
+.iq{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));gap:16px}
+.fieldlbl{display:flex;justify-content:space-between;gap:8px;margin:12px 0 6px}.fieldlbl .desc{font-size:11px}
+.scen{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.sc{text-align:left;display:block;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:#0a1424;min-height:84px;white-space:normal;text-transform:none;letter-spacing:0;font:inherit;color:inherit}
+.sc:hover{border-color:var(--cyan);box-shadow:0 0 14px rgba(34,211,238,.12)}.sc b{display:block;font:700 12.5px var(--disp);color:var(--ink);letter-spacing:.02em;margin-bottom:6px}.sc span{display:block;font:11.5px/1.5 var(--mono);color:var(--muted)}
+.sc .st{margin-top:6px;font:700 10.5px var(--mono)}.sc .st.ok{color:var(--green)}.sc .st.bad{color:var(--red)}.sc .st.run{color:var(--amber)}
+.split{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px}@media(max-width:980px){.split{grid-template-columns:minmax(0,1fr)}}
+.tstat{border:1px solid var(--line);border-radius:10px;background:#050a13;padding:12px}
+.tstat .r{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--sub);margin:4px 0}.tstat .r b{font:700 13px var(--mono);color:var(--teal)}
+.tlist{max-height:330px;overflow:auto;display:grid;gap:8px;margin-top:10px;padding-right:4px}
+.tc{border-left:3px solid var(--teal);background:#0a1424;border-radius:6px;padding:8px 10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px}
+.tc b{font:700 12px var(--sans);color:var(--ink)}.tc .ok{font:700 11px var(--mono);color:var(--green)}.tc .bad{font:700 11px var(--mono);color:var(--red)}.tc span{font:11px var(--mono);color:var(--muted)}.tc.fail{border-left-color:var(--red)}
+table.audit{width:100%;border-collapse:collapse;font:12px var(--mono)}
+table.audit th{font:700 11px var(--disp);letter-spacing:.08em;color:var(--cyan);text-align:left;padding:10px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+table.audit td{padding:9px 10px;border-bottom:1px solid var(--line);color:var(--sub);vertical-align:top}
+table.audit td.id{color:var(--cyan);font-weight:700}table.audit td.ts{color:var(--muted);white-space:nowrap;text-align:right}table.audit th:last-child{text-align:right}
+.op{display:inline-block;font:700 10.5px var(--disp);letter-spacing:.06em;padding:3px 8px;border-radius:5px;border:1px solid;white-space:nowrap}
+.scroll{overflow-x:auto}
+footer{text-align:center;padding:28px 16px 40px;font:12px var(--sans);color:var(--muted);border-top:1px solid var(--line);margin-top:20px}footer b{color:var(--cyan)}
+@media(max-width:600px){table.audit .hide{display:none}.kpi b{font-size:20px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi{padding:12px 12px 12px 14px}.kpi .desc{font-size:11px}
+ .chipglow{display:none}.badge span,#resetAll .t,#sndBtn .t{display:none}.badge{padding:6px 9px}#resetAll{padding:0 10px;min-height:34px}.brand small{display:none}.brand .ic{width:34px;height:34px}.brand b{font-size:16px}header .in{gap:6px 10px}.tabs a{min-height:40px;padding:8px 10px}}
+.view.story-view{max-width:none;padding:0}
+.story{position:relative;height:calc(100vh - var(--hh,112px));min-height:560px;overflow:hidden;background:radial-gradient(ellipse at 50% 35%,#0b1a2c 0%,#04070d 70%)}
+.story canvas{position:absolute;top:0;bottom:0;height:100%;display:block;cursor:grab}
+#cvSA{left:0;width:100%}#cvSB{right:0;width:50%;display:none}.story.split #cvSA{width:50%}.story.split #cvSB{display:block}.story.split::after{content:"";position:absolute;left:50%;top:70px;bottom:120px;border-left:1px dashed rgba(34,211,238,.25)}
+.st-top{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px max(2vw,14px);z-index:3;pointer-events:none}.st-top>*{pointer-events:auto}
+.chap{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.chap button{min-height:40px;padding:0 12px;font:600 12px var(--sans);letter-spacing:.02em;text-transform:none;background:rgba(6,12,22,.7);backdrop-filter:blur(6px)}
+.chap button b{font:800 13px var(--disp);color:var(--muted);margin-right:4px}.chap button.on{border-color:var(--cyan);color:var(--ink)}.chap button.on b{color:var(--cyan)}.chap button.done b{color:var(--teal)}
+.st-ctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.st-ctl button{min-height:40px;background:rgba(6,12,22,.7);backdrop-filter:blur(6px)}
+.st-tag{position:absolute;top:70px;z-index:2;pointer-events:none}.st-tag.l{left:16px}.st-tag.r{left:calc(50% + 16px)}
+.st-narr{position:absolute;left:50%;transform:translateX(-50%);bottom:26px;width:min(860px,92%);text-align:center;z-index:3;pointer-events:none;min-height:84px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
+.st-narr p{font:400 clamp(15px,1.5vw,19px)/1.5 var(--sans);color:#d6e6fa;text-shadow:0 2px 14px #000,0 0 2px #000;transition:opacity .9s,transform .9s;opacity:0;transform:translateY(8px)}.st-narr p.in{opacity:1;transform:none}.st-narr p.old{opacity:.38}.st-narr p.out{opacity:0}
+.st-narr p b{color:var(--cyan);font-weight:600}
+.st-panel{position:absolute;right:max(2vw,14px);bottom:130px;z-index:3;width:min(300px,86vw);display:none}.st-panel.on{display:block}
+.glass{background:rgba(6,12,22,.78);backdrop-filter:blur(8px);border:1px solid var(--line2);border-radius:12px;padding:14px}
+.holdbtn{width:100%;min-height:64px;font-size:13px;border-color:var(--cyan);color:var(--cyan);touch-action:none;user-select:none;-webkit-user-select:none}.holdbtn.on{background:rgba(34,211,238,.18);box-shadow:0 0 22px rgba(34,211,238,.35)}
+.st-hud{position:absolute;left:max(2vw,14px);bottom:130px;z-index:3;display:none;width:min(340px,86vw)}.st-hud.on{display:block}
+.memrow{margin:6px 0 10px}.memrow .lbl{display:flex;justify-content:space-between}.memrow b{font:700 18px var(--disp);display:block;margin-top:4px}
+.st-over{position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at center,rgba(4,7,13,.25),rgba(4,7,13,.85))}.st-over.on{display:flex}
+.st-enter .box{text-align:center;max-width:640px}.st-enter h1{font-size:clamp(32px,6vw,64px);letter-spacing:.06em;background:linear-gradient(90deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.st-enter p{color:var(--sub);margin:14px auto 26px;font-size:clamp(15px,1.6vw,18px);max-width:52ch}.st-enter .eyebrow{font:600 12px var(--mono);color:var(--teal);letter-spacing:.14em}
+.bigbtn{min-height:56px;padding:0 28px;font-size:14px}
+.st-end .box{width:min(860px,100%)}.endgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0}
+.endgrid .kpi b{font-size:clamp(18px,2vw,24px)}
+@media(max-width:700px){.story.split #cvSA{width:100%;height:50%}.story.split #cvSB{width:100%;height:50%;top:50%}.story.split::after{display:none}.st-tag.r{left:16px;top:calc(50% + 10px)}.st-panel{bottom:120px;right:10px}.st-hud{bottom:auto;top:110px;left:10px}.chap button span{display:none}}
+body.story-on footer{display:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<header class="top"><div class="in">
+ <a class="brand" href="#index"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span><b>WAREHOUSE IQ</b><small>Every arrival counts. Every gap matters.</small></span></a>
+ <nav class="tabs" aria-label="Sections">
+  <a href="#story">▶ Story</a><a href="#index">Warehouse</a><a href="#tree">Index tree</a><a href="#dashboard">Dashboard</a><a href="#compare">AVL vs Unbalanced</a><a href="#bridge">Bridge demo</a><a href="#tests">Tests</a><a href="#data">Log and share</a></nav>
+ <div class="hright"><button class="sm" id="sndBtn" aria-pressed="false" title="Sound (off by default)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path id="sndWave" d="M16 9a5 5 0 0 1 0 6" opacity=".25"/></svg><span class="t">Sound off</span></button><span class="chipglow"><i></i>AVL TREE · O(log k)</span>
+  <button class="badge" id="invBadge" title="Invariant check"><i></i><span>Invariants OK</span></button><button class="badge" id="orcBadge" title="Brute-force cross-check"><i></i><span>Brute force OK</span></button>
+  <button class="red sm" id="resetAll" aria-label="Reset warehouse"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="t">Reset warehouse</span></button></div>
+</div></header>
+
+<!-- ============ STORY ============ -->
+<section class="view story-view" id="v-story" aria-label="Story mode">
+ <div class="story" id="story">
+  <canvas id="cvSA" aria-label="Story 3D view"></canvas><canvas id="cvSB" aria-label="Story 3D view, right"></canvas>
+  <span class="st-tag l" id="tagA"></span><span class="st-tag r" id="tagB"></span>
+  <div class="st-top"><ol class="chap" id="chap">
+    <li><button data-ch="1"><b>1</b><span>Arrivals</span></button></li><li><button data-ch="2"><b>2</b><span>Bridges</span></button></li>
+    <li><button data-ch="3"><b>3</b><span>The vast gaps</span></button></li><li><button data-ch="4"><b>4</b><span>Balance</span></button></li></ol>
+   <div class="st-ctl"><button class="sm" id="stAuto" aria-pressed="true">Auto: on</button><button class="pri sm" id="stNext">Next ▸</button><button class="sm" id="stSkip">Skip chapter</button><button class="sm" id="stKeysBtn">?</button></div></div>
+  <div class="keys" id="stKeys" style="top:64px;right:16px;bottom:auto"><b style="color:var(--ink)">Story keys</b><br><kbd>Space</kbd> next step<br><kbd>1</kbd>–<kbd>4</kbd> jump to a chapter<br><kbd>←</kbd> <kbd>→</kbd> undo and redo (chapter 1)<br><kbd>?</kbd> show or hide this</div>
+  <div class="st-panel glass" id="stP1"><div class="lbl" style="margin-bottom:8px">Your turn</div>
+   <button class="pri holdbtn" id="stHold">Press and hold to stream arrivals</button>
+   <div class="row" style="margin-top:10px"><input type="text" id="stId" inputmode="numeric" placeholder="Type an ID" aria-label="Package ID"><button class="sm" id="stAdd">Add</button></div><div class="err" id="stErr"></div>
+   <div class="row"><button class="sm" id="stUndo">← Undo</button><button class="sm" id="stRedo">Redo →</button></div></div>
+  <div class="st-panel glass" id="stP3"><div class="lbl" style="margin-bottom:8px">Number line scale</div><div class="seg"><button id="stLin" class="on">Linear</button><button id="stCmp">Compressed</button></div></div>
+  <div class="st-hud glass" id="stHud"></div>
+  <div class="st-narr" id="stNarr" aria-live="polite"></div>
+  <div class="st-over st-enter on" id="stEnter"><div class="box"><div class="eyebrow">PROBLEM STATEMENT 09 · A STORY IN FOUR CHAPTERS</div><h1>Live Arrival Index</h1>
+   <p>Packages arrive out of order. One small tree keeps them as sorted ranges, finds every gap, and never grows bigger than the number of ranges.</p>
+   <div class="row" style="justify-content:center"><button class="pri bigbtn" id="stGo">Enter the warehouse</button><button class="bigbtn" id="stFree">Skip to free explore</button></div></div></div>
+  <div class="st-over st-end" id="stEnd"><div class="box glass" style="padding:24px"><div class="eyebrow" style="font:600 12px var(--mono);color:var(--teal);letter-spacing:.14em">THE END · VERIFIED</div><h1 class="ttl-cyan" style="margin-top:8px">The warehouse holds</h1>
+   <div class="endgrid" id="endGrid"></div><div class="bar"><i id="endBar"></i></div><p class="desc" id="endNote" style="margin-top:8px"></p>
+   <div class="row" style="margin-top:16px"><button class="pri" id="stRestart">Restart the story</button><a href="#index" style="text-decoration:none"><button>Explore freely</button></a><a href="#tests" style="text-decoration:none"><button>See all tests</button></a></div></div></div>
+ </div>
+</section>
+
+<!-- ============ WAREHOUSE (HOME) ============ -->
+<section class="view" id="v-index" aria-label="Warehouse">
+ <div class="kpis">
+  <div class="kpi" style="--c:var(--cyan)"><div class="lbl">Unique packages<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d6a26b" stroke-width="2" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg></div><b id="kU">0</b><div class="desc">Total distinct IDs recorded</div></div>
+  <div class="kpi" style="--c:var(--teal)"><div class="lbl">Active intervals<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a9b8cc" stroke-width="2" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div><b id="kI">0</b><div class="desc">Maximal consecutive ranges</div></div>
+  <div class="kpi" style="--c:var(--amber)"><div class="lbl"><span id="kMl">Missing in range</span><svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b" aria-hidden="true"><path d="M12 2 1 21h22z"/><path d="M12 9v5M12 17v.5" stroke="#1a1205" stroke-width="2.4"/></svg></div><b id="kM">0 MISSING</b><div class="desc" id="kMd">Gaps between the first and last ID</div></div>
+  <div class="kpi" style="--c:var(--violet)"><div class="lbl">Duplicate arrivals<svg width="16" height="16" viewBox="0 0 24 24" fill="#3b82f6" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5z"/></svg></div><b id="kD">0</b><div class="desc">Ignored without interval modification</div></div>
+  <div class="kpi" style="--c:var(--blue)"><div class="lbl">Lookup complexity<svg width="16" height="16" viewBox="0 0 24 24" fill="#f97316" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div><b id="kC">O(log k)</b><div class="desc" id="kCd">Max comparisons ≈ 0 steps</div></div>
+ </div>
+
+ <div class="card">
+  <div class="chead"><h2 class="ttl-cyan">3D warehouse inventory hangar <span class="pill cy" style="font-size:9.5px">LIVE SIMULATION</span></h2>
+   <div class="camtabs" role="group" aria-label="Camera"><button class="on" data-cam="overview">Overview cam</button><button data-cam="scanner">Scanner cam</button><button data-cam="bays">Interval bays</button><button data-cam="top">Top-down</button><button data-cam="orbit">Auto orbit</button></div></div>
+  <div class="stage s-hero"><canvas id="cvHangar" aria-label="3D warehouse: one rack per range, one box per package, empty bays for missing IDs"></canvas>
+   <div class="ovl bl hud" id="hud">UNIQUE ARRIVALS: <b>0</b><br>ACTIVE INTERVALS (k): <b>0</b><br>DUPLICATES FILTERED: <b>0</b></div>
+   <div class="ovl tl hud" id="hangHover" style="display:none"></div>
+   <span class="ovl br">Drag to orbit · scroll to zoom · right-drag to pan · hover a rack</span></div>
+  <p class="desc" id="hangCap" style="margin-top:10px">Racks hold up to 12 boxes; a bigger range shows its full count on the label.</p>
+ </div>
+
+ <div class="card" style="margin-top:16px">
+  <div class="chead"><div><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="12" height="12" rx="2"/><path d="M8 20h12V8"/></svg>Live interval index &amp; consecutive ranges</h2><p class="small muted" style="margin-top:4px">Sorted, non-overlapping maximal consecutive intervals. Missing IDs remain separated until bridged.</p></div></div>
+  <div class="ivstrip" id="ivStrip"></div>
+ </div>
+
+ <div class="iq" style="margin-top:16px">
+  <div class="card"><div class="chead"><h2>Receive packages</h2></div>
+   <div class="fieldlbl"><span class="lbl">Package ID</span><span class="desc">Non-negative integer [0 .. 10⁹]</span></div>
+   <div class="row"><input type="text" id="hPkg" inputmode="numeric" placeholder="Enter ID (e.g. 5)" aria-label="Package ID"><button class="pri" id="hAdd"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 2v20l18-10z"/></svg>Add package</button></div>
+   <div class="fieldlbl"><span class="lbl">Quick arrivals</span></div>
+   <div class="row"><button class="sm" id="hNext">+ Next ID</button><button class="sm" id="hRand">Random (1–100)</button><button class="sm" id="hBig">1,000,000,000</button></div>
+   <div class="fieldlbl"><span class="lbl">Batch arrivals</span><span class="desc">Comma or space separated list</span></div>
+   <div class="row"><input type="text" id="hBatch" placeholder="e.g. 1, 3, 7, 2, 6" aria-label="Batch of package IDs"><button class="blu" id="hBatchBtn">Batch ingest</button></div>
+   <div class="err" id="hErr"></div></div>
+  <div class="card"><div class="chead"><h2>Gap analysis</h2></div>
+   <div class="row" style="align-items:end"><div style="flex:1 1 120px"><div class="lbl" style="margin-bottom:6px">Start ID</div><input type="number" id="hS" value="1" aria-label="Start ID"></div>
+    <div style="flex:1 1 120px"><div class="lbl" style="margin-bottom:6px">End ID</div><input type="number" id="hE" value="10" aria-label="End ID"></div>
+    <button class="amb" id="hAnalyze">Analyze gaps</button><button class="sm" id="hClearQ">Clear</button></div>
+   <div class="row" style="margin-top:12px"><span class="lbl">Presets:</span><button class="sm" data-q="1,10">[1 .. 10]</button><button class="sm" data-q="1,100">[1 .. 100]</button><button class="sm" data-q="2,9">[2 .. 9]</button><button class="sm" data-q="0,1000">[0 .. 1000]</button></div>
+   <div class="err" id="hQErr"></div>
+   <div style="border:1px solid var(--line);border-radius:10px;background:#050a13;padding:12px;min-height:70px;margin-top:6px"><div class="lbl" id="hQTitle" style="margin-bottom:8px">Missing ranges</div><div class="chips" id="hGaps"><span class="desc">Press "Analyze gaps" to look inside a window.</span></div></div></div>
+ </div>
+
+ <div class="split" style="margin-top:16px">
+  <div class="card"><div class="chead"><div><h2><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#22d3ee"/><path d="M10 8v8l6-4z" fill="#04121a"/></svg>Demonstration mode (preset scenarios)</h2><p class="small muted" style="margin-top:4px">Each scenario resets the warehouse, plays its arrivals through the real AVL index, and checks the result against the expected ranges.</p></div></div>
+   <div class="scen" id="scen"></div></div>
+  <div class="card"><div class="chead"><div><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>Mandatory algorithm tests</h2><p class="small muted" style="margin-top:4px"><span id="hTCount">21</span> automated invariant verifications</p></div><button class="pri" id="hRunTests">Run tests</button></div>
+   <div class="tstat"><div class="r"><span>Test status</span><b id="hTStat">Not run yet</b></div><div class="r"><span>Total benchmark time</span><b id="hTTime">–</b></div>
+    <div class="tlist" id="hTList"></div></div></div>
+ </div>
+
+ <div class="card" style="margin-top:16px">
+  <div class="chead"><div><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>Live arrival history audit trail</h2><p class="small muted" style="margin-top:4px">Chronological stream of incoming packages, operations, interval mutations, and timestamps. Newest first.</p></div></div>
+  <div class="scroll"><table class="audit"><thead><tr><th>Seq #</th><th>Package ID</th><th>Operation</th><th class="hide">Result description</th><th>Timestamp</th></tr></thead><tbody id="audit"></tbody></table></div>
+ </div>
+</section>
+
+<!-- ============ INDEX TREE ============ -->
+<section class="view" id="v-tree" aria-labelledby="h-tree">
+ <div class="head"><div><h1 id="h-tree" class="ttl-cyan">Index tree</h1><p>The AVL tree behind the warehouse. Each node is one range; the track below is the number line. Watch the search path, the case, and every rotation. Click a node or a block to link them.</p></div></div>
+ <div class="cols">
+ <aside class="panel side">
+  <h3>Packages arrive</h3>
+  <div class="row"><input type="text" id="ids" placeholder="1, 3, 7, 2, 6" aria-label="Package IDs, comma separated"><button class="pri" id="addBtn">Add</button></div>
+  <div class="err" id="idsErr"></div>
+  <h3>Range query</h3>
+  <div class="row"><input type="number" id="qL" placeholder="From" aria-label="Query from"><input type="number" id="qR" placeholder="To" aria-label="Query to"></div>
+  <div class="row" style="margin-top:8px"><button class="amb" id="qBtn">Show gaps</button><button id="qClear">Clear</button></div>
+  <div class="err" id="qErr"></div>
+  <h3>Presets</h3>
+  <div class="presets"><button data-p="1"><b>1</b>Problem example</button><button data-p="2"><b>2</b>Bridge merge</button><button data-p="3"><b>3</b>Sparse IDs</button><button data-p="4"><b>4</b>Sorted input</button></div>
+  <h3>Tree mode</h3><div class="seg" role="group" aria-label="Balance mode"><button id="mAVL" class="on">AVL</button><button id="mUnb">Unbalanced</button></div>
+  <h3>Track scale</h3><div class="seg" role="group" aria-label="Scale"><button id="sLin" class="on">Linear</button><button id="sCmp">Compressed</button></div>
+  <label class="chk"><input type="checkbox" id="dbg"> Show height and balance</label>
+  <details><summary>More operations</summary>
+   <h3>Insert a whole range</h3><div class="row"><input type="number" id="rL" placeholder="From" aria-label="Range from"><input type="number" id="rR" placeholder="To" aria-label="Range to"><button id="rBtn">Insert</button></div>
+   <h3>Remove one ID</h3><div class="row"><input type="number" id="dX" placeholder="ID" aria-label="ID to remove"><button class="red" id="dBtn">Remove</button></div>
+   <div class="err" id="moreErr"></div></details>
+  <div class="row" style="margin-top:12px"><button id="undo">Undo</button><button id="redo">Redo</button><button class="red" id="reset">Reset</button></div>
+ </aside>
+ <div>
+  <div class="stage s-big"><canvas id="cvIndex" tabindex="0" aria-label="3D view of the interval tree and number-line track"></canvas>
+   <span class="ovl tl"><span class="pill" id="capBadge" style="display:none"></span></span>
+   <span class="ovl br" id="hintIdx">Drag to orbit · right-drag to pan · scroll to zoom · double-click to reset · ? for keys</span>
+   <div class="keys" id="keys"><b style="color:var(--ink)">Keyboard</b><br><kbd>Space</kbd> play, pause or step<br><kbd>←</kbd> <kbd>→</kbd> undo and redo<br><kbd>1</kbd>–<kbd>4</kbd> presets<br><kbd>?</kbd> show or hide this</div></div>
+  <div class="caption" id="caption" aria-live="polite">Add package IDs, or press preset 1 to play the example from the problem statement.</div>
+  <div class="transport"><button id="play" class="on">Pause</button><button id="step">Step</button>
+   <label class="lbl" for="speed">Speed</label><input type="range" id="speed" min="0.25" max="4" step="0.25" value="1" style="width:130px"><span class="mono small" id="speedOut">1×</span>
+   <span class="desc" id="queueOut"></span><button id="fit">Reset view</button></div>
+  <div class="legend"><span><i style="background:#3b82f6"></i>New range</span><span><i style="background:#22c55e"></i>Extended</span><span><i style="background:#f97316"></i>Bridge merge</span><span><i style="background:#64748b"></i>Duplicate</span><span><i style="background:#8b5cf6"></i>Range or removal</span><span><i style="background:repeating-linear-gradient(90deg,#ef4444 0 4px,transparent 4px 7px)"></i>Missing</span><span><i style="background:#f59e0b"></i>Search path</span></div>
+  <div class="grid">
+   <div class="panel"><h2 id="ivTitle">Arrived ranges</h2><div class="chips" id="ivList" style="margin-top:10px"></div><h3 id="gapTitle">Missing between them</h3><div class="chips" id="gapList"></div></div>
+   <div class="panel"><h2>Selected node</h2><div class="info" id="selInfo"><span class="muted">Click a node or a block in the 3D view.</span></div></div>
+  </div>
+ </div></div>
+</section>
+
+<!-- ============ DASHBOARD ============ -->
+<section class="view" id="v-dashboard" aria-labelledby="h-dash">
+ <div class="head"><div><h1 id="h-dash" class="ttl-cyan">Dashboard</h1><p>Live numbers for the warehouse index. Every update touches about log₂ k nodes, and memory follows the number of ranges, not the size of the IDs.</p></div></div>
+ <div class="tiles">
+  <div class="tile"><b id="tN">0</b><span>ranges stored</span></div><div class="tile"><b id="tIds">0</b><span>IDs covered</span></div>
+  <div class="tile"><b id="tH">0</b><span>tree height</span></div><div class="tile"><b id="tB">0</b><span>AVL bound 1.44 log₂(n+2)</span></div>
+  <div class="tile"><b id="tOps">0</b><span>operations</span></div><div class="tile"><b id="tRot">0</b><span>rotations</span></div></div>
+ <div class="grid2">
+  <div class="panel"><h2>Nodes visited per operation</h2><p class="desc" style="margin-top:6px">Last 40 operations, coloured by case. An insert runs two searches (floor and higher), so the amber line is 2 log₂ n. Hover a bar.</p>
+   <div class="stage s-mid" style="margin-top:10px"><canvas id="cvVisits" aria-label="3D bar chart of nodes visited per operation"></canvas></div><div class="readout" id="visRead"></div></div>
+  <div class="panel"><h2>Memory: tree against a plain array</h2><p class="desc" style="margin-top:6px">Log scale; each grid step is ten times more. Hover a tower.</p>
+   <div class="stage s-mid" style="margin-top:10px"><canvas id="cvMem" aria-label="3D towers comparing memory"></canvas></div><div class="readout" id="memRead"></div></div>
+  <div class="panel"><h2>Cases so far</h2><div id="caseBars" style="margin-top:10px"></div></div>
+  <div class="panel"><h2>Height against the AVL bound</h2><p class="small" id="hTxt" style="margin-top:8px;color:var(--sub)"></p><div class="meter"><i id="hBar" style="background:var(--cyan)"></i></div>
+   <p class="desc">In AVL mode the height stays under the bound. Switch to Unbalanced on the Index tree page and run preset 4 to watch it climb.</p>
+   <h3>Height over time</h3><div class="chart2d" id="hChartBox"><svg id="hChart"></svg></div></div>
+ </div>
+</section>
+
+<!-- ============ COMPARE ============ -->
+<section class="view" id="v-compare" aria-labelledby="h-cmp">
+ <div class="head"><div><h1 id="h-cmp" class="ttl-cyan">AVL vs Unbalanced</h1><p>The same IDs go into two trees. The left one rotates to stay balanced; the right one never does. Sorted input is the worst case for the right one.</p></div></div>
+ <div class="panel"><div class="row">
+  <div class="seg" role="group" aria-label="Input"><button id="cSorted" class="on">Sorted</button><button id="cRandom">Random</button><button id="cCustom">My own</button></div>
+  <label class="lbl" for="cN">How many</label><input type="range" id="cN" min="4" max="40" step="1" value="15" style="width:150px"><span class="mono small" id="cNOut">15</span>
+  <input type="text" id="cList" placeholder="5, 9, 1, 30" aria-label="Your own IDs" style="display:none;flex:1 1 200px">
+  <button class="pri" id="cPlay">Play</button><button id="cReset">Reset</button></div><div class="err" id="cErr"></div>
+  <p class="desc" id="cDesc">Sorted: 2, 4, 6 … (spaced so they never merge into one range).</p></div>
+ <div class="grid2" style="margin-top:16px">
+  <div><div class="stage s-mid"><canvas id="cvA" aria-label="AVL tree"></canvas><span class="ovl tl"><span class="pill cy">AVL</span></span></div>
+   <div class="panel" style="margin-top:10px"><p class="small" id="cAtxt" style="color:var(--sub)"></p><div class="meter"><i id="cAbar" style="background:var(--cyan)"></i></div></div></div>
+  <div><div class="stage s-mid"><canvas id="cvB" aria-label="Unbalanced tree"></canvas><span class="ovl tl"><span class="pill rd">UNBALANCED</span></span></div>
+   <div class="panel" style="margin-top:10px"><p class="small" id="cBtxt" style="color:var(--sub)"></p><div class="meter"><i id="cBbar" style="background:var(--red)"></i></div></div></div>
+ </div>
+</section>
+
+<!-- ============ BRIDGE ============ -->
+<section class="view" id="v-bridge" aria-labelledby="h-br">
+ <div class="head"><div><h1 id="h-br" class="ttl-cyan">Bridge demo</h1><p>One missing ID joins two ranges. Only its two neighbours are checked, and two nodes become one. Everything else in the tree stays as it was.</p></div></div>
+ <div class="panel"><div class="row">
+  <span class="lbl">Left range</span><input type="number" id="bA" value="1" aria-label="Left range from" style="max-width:110px"><input type="number" id="bB" value="3" aria-label="Left range to" style="max-width:110px">
+  <span class="lbl">Right range</span><input type="number" id="bC" value="5" aria-label="Right range from" style="max-width:110px"><input type="number" id="bD" value="8" aria-label="Right range to" style="max-width:110px">
+  <input type="text" id="bOther" value="12-14, 20, 26-30" aria-label="Other ranges" style="flex:1 1 180px"><button id="bBuild">Set up</button><button class="pri" id="bPlay">Add the missing ID</button></div>
+  <div class="err" id="bErr"></div><p class="desc">The right range must start exactly two after the left one ends, so a single ID is missing. The last box holds other ranges, which stay untouched.</p></div>
+ <div class="grid2" style="margin-top:16px">
+  <div><div class="stage s-mid"><canvas id="cvB0" aria-label="Before the bridge"></canvas><span class="ovl tl"><span class="pill gy">BEFORE</span></span></div></div>
+  <div><div class="stage s-mid"><canvas id="cvB1" aria-label="After the bridge"></canvas><span class="ovl tl"><span class="pill or">AFTER</span></span></div></div>
+ </div>
+ <div class="panel" style="margin-top:16px"><h2>What happened</h2><ol class="steps" id="bSteps" style="margin-top:10px"><li class="muted">Press "Add the missing ID".</li></ol></div>
+</section>
+
+<!-- ============ TESTS ============ -->
+<section class="view" id="v-tests" aria-labelledby="h-t">
+ <div class="head"><div><h1 id="h-t" class="ttl-cyan">Tests</h1><p>Bridge merges, duplicates, sparse IDs, edges, every rotation type, range insert, delete splitting, and 10,000 random operations checked against a brute-force version.</p></div></div>
+ <div class="grid2">
+  <div class="panel"><h2>Test suite</h2><div class="row" style="margin-top:10px"><button class="pri" id="runTests">Run all tests</button><button class="red" id="bug">Inject a bug</button></div>
+   <p class="desc" id="testSum" style="margin-top:10px">Not run yet.</p><ul class="tests" id="tests"></ul></div>
+  <div class="panel"><h2>Stress test: 50,000 random IDs</h2><p class="desc" style="margin-top:6px">IDs from 0 to 1,000,000,000, inserted into a separate tree. The view shows its top 5 levels.</p>
+   <div class="row" style="margin-top:10px"><button class="pri" id="stress">Run stress test</button></div>
+   <div class="bar" style="margin-top:12px"><i id="stressBar"></i></div><p class="small" id="stressOut" style="margin-top:8px;color:var(--sub)"></p>
+   <div class="stage s-sm" style="margin-top:10px"><canvas id="cvStress" aria-label="Top of the stress-test tree"></canvas><span class="ovl tl"><span class="pill" id="stressCap" style="display:none"></span></span><span class="ovl br">Scroll or pinch to zoom in and read the labels</span></div>
+   <h3>Height as IDs arrive</h3><div class="chart2d" id="sChartBox"><svg id="sChart"></svg></div></div>
+ </div>
+ <div class="panel" style="margin-top:16px"><h2>Benchmark</h2>
+  <p class="desc" style="margin-top:6px">AVL inserts at n = 1,000 · 10,000 · 100,000 (hard cap), random IDs and sorted IDs 2, 4, 6 …, in chunks of 5,000 so the page stays responsive. Visited nodes count both searches (floor and higher).</p>
+  <div class="row" style="margin-top:10px"><button class="pri" id="benchBtn">Run benchmark</button><span class="desc" id="benchNote"></span></div>
+  <div class="scroll" style="margin-top:10px"><table class="audit"><thead><tr><th>Input</th><th>n</th><th>Total ms</th><th>Avg visited / insert</th><th>Height</th><th>1.44·log₂(n+2)</th></tr></thead><tbody id="benchBody"></tbody></table></div></div>
+</section>
+
+<!-- ============ DATA ============ -->
+<section class="view" id="v-data" aria-labelledby="h-d">
+ <div class="head"><div><h1 id="h-d" class="ttl-cyan">Log and share</h1><p>Every operation in order, a share code that rebuilds the same warehouse anywhere, and the five-minute demo script.</p></div></div>
+ <div class="grid2">
+  <div class="panel"><h2>Operation log</h2><pre class="log" id="log" style="margin-top:10px"></pre>
+   <div class="row" style="margin-top:10px"><button id="copyLog">Copy log</button><button id="copyJson">Copy ranges as JSON</button></div><p class="desc" id="copyOut" style="margin-top:6px"></p></div>
+  <div class="panel"><h2>Share this state</h2><p class="desc" style="margin-top:6px">The code lists every operation. Paste it below on any device to rebuild the same warehouse.</p>
+   <textarea id="shareCode" readonly aria-label="Share code" style="margin-top:8px"></textarea>
+   <div class="row" style="margin-top:8px"><button id="copyShare">Copy share code</button></div>
+   <h3>Import a code</h3><textarea id="importCode" aria-label="Paste a share code"></textarea>
+   <div class="row" style="margin-top:8px"><button class="pri" id="importBtn">Load</button></div><div class="err" id="importErr"></div>
+   <h3>Five-minute demo script</h3><ol class="steps">
+    <li><b>Warehouse:</b> scenario 1, the problem's example. Switch the hangar cameras.</li>
+    <li><b>Bridge demo:</b> one ID joins two ranges; only two neighbours are checked.</li>
+    <li><b>Warehouse:</b> scenario 7, sparse IDs. Then the Dashboard memory towers.</li>
+    <li><b>AVL vs Unbalanced:</b> play sorted input and compare the heights.</li>
+    <li><b>Index tree:</b> insert a whole range, then remove one ID from its middle.</li>
+    <li><b>Tests:</b> run all tests, then the 50,000-ID stress test.</li></ol></div>
+ </div>
+ <details class="panel" style="margin-top:16px" id="invDetails"><summary>Invariant and cross-check details</summary><p class="small" id="invText" style="margin-top:6px;color:var(--sub)"></p></details>
+</section>
+
+<footer>WAREHOUSE IQ • Problem Statement 09 – The Warehouse's Broken Number Ranges<br>Incremental AVL balanced binary search tree indexing • Time: <b>O(log k)</b> • Space: <b>O(k)</b></footer>
+
+<script>
+/*CORE*/
+/*ENGINE*/
+{
+/*APP*/
+}
+</script></body></html>
