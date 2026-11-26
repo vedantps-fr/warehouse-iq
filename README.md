@@ -61,4 +61,4 @@ PROCESS.md          step-by-step build log: every step, its check, and the bugs 
 
 ## Languages
 JavaScript (logic, 3D, animation), HTML (structure), CSS (design). No frameworks and no libraries;
-fonts come from Google Fonts..
+fonts come from Google Fonts.
